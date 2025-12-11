@@ -599,6 +599,7 @@
         
         .video-player {
             width: 100%;
+            max-width: 100%;
             display: block;
             border-radius: var(--border-radius);
         }
@@ -2085,7 +2086,7 @@ if data.get("ok"):
                                     </div>
                                     <div>
                                         <p class="text-sm text-gray">Creator</p>
-                                        <p class="font-semibold">${data.creator || 'Tidak tersedia'}</p>
+                                        <p class="font-semibold">${data.video.author || 'Tidak tersedia'}</p>
                                     </div>
                                 </div>
                             </div>

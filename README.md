@@ -406,7 +406,7 @@ Untuk deploy ke production:
 
 **Note**: Pastikan untuk mengikuti Terms of Service TikTok saat menggunakan tool ini. Penggunaan untuk konten copyrighted tanpa izin mungkin melanggar hukum.
 
-**Last Updated**: December 2023
+**Last Updated**: 11 Desember 2025
 
 **Version**: 1.0.0
 
