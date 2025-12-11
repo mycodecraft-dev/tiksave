@@ -1,6 +1,5 @@
 # README.md - TikTok Downloader
 
-```markdown
 # TikTok Downloader
 
 Website untuk mengunduh video TikTok tanpa watermark dengan mudah dan gratis. Dibangun dengan Express.js dan antarmuka web yang responsif.
@@ -32,7 +31,7 @@ Sebelum menjalankan aplikasi, pastikan Anda memiliki:
 ### 1. Clone/Download Proyek
 
 ```bash
-git clone [repository-url]
+git clone https://github.com/fareldev-hub/tiktok-downloader
 cd tiktok-downloader
 ```
 
@@ -420,5 +419,4 @@ File README.md ini memberikan panduan lengkap untuk:
 5. **Deployment** - Cara deploy ke berbagai platform
 6. **Contoh kode** - Implementasi dalam JavaScript, Python, PHP, dan cURL
 
-## Review website
-[Lihat website](https://tiktok-hub-downloader.up.railway.app)
+## Review website : [Lihat website](https://tiktok-hub-downloader.up.railway.app)
