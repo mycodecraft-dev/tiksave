@@ -58,7 +58,7 @@ npm start
 
 Untuk development dengan auto-restart:
 ```bash
-npm run dev
+npm start dev
 ```
 
 ### 5. Akses Website
