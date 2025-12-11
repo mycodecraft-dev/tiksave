@@ -409,9 +409,9 @@ Untuk deploy ke production:
 **Last Updated**: December 2023
 
 **Version**: 1.0.0
-```
 
 File README.md ini memberikan panduan lengkap untuk:
+
 1. **Instalasi dan setup** - Langkah demi langkah cara menjalankan proyek
 2. **Penggunaan API** - Dokumentasi lengkap endpoint dengan contoh berbagai bahasa
 3. **Struktur proyek** - Penjelasan file dan folder
