@@ -4,11 +4,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="google-site-verification" content="IeW8RbzGSaFQ1DumsHlAPBRtaimk2htjAv1Ml4jxR1A" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#ff0050">
+    <meta name="msapplication-navbutton-color" content="#ff0050">
+    <meta name="apple-mobile-web-app-title" content="TikSave">
     <title>Tiksave - Unduh Video TikTok Tanpa Watermark</title>
     <link rel="favicon" href="favicon.ico">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
     <style>
         /* ===== RESET & BASE STYLES ===== */
         * {
@@ -1705,6 +1712,7 @@
             }
         }
 
+
         @media (max-width: 768px) {
             h1 {
                 font-size: 2.25rem;
@@ -1716,10 +1724,15 @@
 
             .header-content {
                 flex-wrap: wrap;
+                gap: 1rem;
             }
 
+            /* Improved mobile navigation */
             .mobile-menu-btn {
                 display: flex;
+                width: 44px;
+                height: 44px;
+                touch-action: manipulation;
             }
 
             .nav {
@@ -1730,52 +1743,249 @@
                 background: var(--dark-light);
                 border: 1px solid var(--gray);
                 border-radius: var(--border-radius);
-                margin: 0 24px;
+                margin: 0 16px;
                 padding: 1rem;
                 flex-direction: column;
                 display: none;
                 z-index: 999;
                 box-shadow: var(--box-shadow);
+                max-height: calc(100vh - 100px);
+                overflow-y: auto;
             }
 
             .nav.active {
                 display: flex;
             }
 
+            .nav-link {
+                padding: 1rem;
+                min-height: 44px;
+                border-radius: var(--border-radius-sm);
+                touch-action: manipulation;
+            }
+
+            /* Improved mobile form */
             .input-group {
                 flex-direction: column;
+                gap: 0.75rem;
             }
 
             .btn {
                 width: 100%;
+                min-height: 44px;
+                padding: 0.875rem 1.5rem;
+                font-size: 0.95rem;
+                touch-action: manipulation;
             }
 
+            /* Mobile download options */
             .download-options {
                 grid-template-columns: 1fr;
+                gap: 0.75rem;
             }
 
+            .download-options .btn {
+                min-height: 48px;
+                padding: 1rem;
+            }
+
+            /* Mobile charts */
             .charts-grid {
                 grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            /* Mobile download card */
+            .download-card {
+                padding: 1.5rem;
+                margin: 0 -8px;
+            }
+
+            /* Mobile form control */
+            .form-control {
+                padding: 1rem 1rem 1rem 3rem;
+                font-size: 16px; /* Prevents zoom on iOS */
+                border-radius: var(--border-radius-sm);
+            }
+
+            /* Mobile feature cards */
+            .features {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .feature {
+                padding: 1.5rem;
+            }
+
+            .feature-icon {
+                width: 3.5rem;
+                height: 3.5rem;
+            }
+
+            /* Mobile video container */
+            .video-player-container {
+                max-width: 100%;
+                border-radius: var(--border-radius-sm);
+            }
+
+            .video-player-container.portrait,
+            .video-player-container.ratio-4-5 {
+                max-height: 50vh;
+            }
+
+            .video-player-container.landscape {
+                max-height: 35vh;
+            }
+
+            .video-player-container.square {
+                max-height: 45vh;
+            }
+
+            /* Mobile media info */
+            .media-info {
+                padding: 1rem;
+                border-radius: var(--border-radius-sm);
+            }
+
+            .info-item {
+                padding: 0.75rem 0;
+            }
+
+            .info-icon {
+                width: 2.25rem;
+                height: 2.25rem;
+                font-size: 0.875rem;
+            }
+
+            /* Mobile chart container */
+            .chart-container {
+                padding: 1rem;
+                border-radius: var(--border-radius-sm);
+            }
+
+            .chart-container > div {
+                height: 220px !important;
+            }
+
+            /* Mobile stat cards */
+            .stat-card {
+                padding: 1.25rem;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+
+            /* Mobile content cards */
+            .content-card {
+                padding: 1.5rem;
+                margin: 0 -8px;
+            }
+
+            /* Mobile donation cards */
+            .donation-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .donation-card {
+                padding: 1.5rem;
+            }
+
+            .donation-icon {
+                width: 4rem;
+                height: 4rem;
+                font-size: 1.5rem;
+            }
+
+            /* Mobile footer */
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .social-links {
+                justify-content: center;
             }
         }
 
         @media (max-width: 480px) {
-            .container {
-                padding: 0 16px;
-            }
-
+            /* Extra small mobile optimizations */
             h1 {
                 font-size: 2rem;
+                line-height: 1.1;
             }
 
-            .download-card {
-                padding: 1.5rem;
-            }
-
+            .download-card,
             .content-card {
-                padding: 1.5rem;
+                padding: 1rem;
+                margin: 0 -4px;
+            }
+
+            .btn {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .form-control {
+                padding: 0.875rem 0.875rem 0.875rem 2.75rem;
+            }
+
+            .video-player-container.portrait,
+            .video-player-container.ratio-4-5 {
+                max-height: 45vh;
+            }
+
+            .video-player-container.landscape {
+                max-height: 30vh;
+            }
+
+            .video-player-container.square {
+                max-height: 40vh;
+            }
+
+            .media-info {
+                padding: 0.75rem;
+            }
+
+            .info-item {
+                padding: 0.5rem 0;
+            }
+
+            .chart-container > div {
+                height: 180px !important;
+            }
+
+            .stat-number {
+                font-size: 1.75rem;
+            }
+
+            .features {
+                gap: 0.75rem;
+            }
+
+            .feature {
+                padding: 1rem;
+            }
+
+            .feature-icon {
+                width: 3rem;
+                height: 3rem;
+                font-size: 1.25rem;
+            }
+
+            /* Touch target improvements */
+            .btn,
+            .nav-link,
+            .mobile-menu-btn,
+            .form-control {
+                min-height: 44px;
             }
         }
+
+
+
 
         /* ===== UTILITY CLASSES ===== */
         .rounded {

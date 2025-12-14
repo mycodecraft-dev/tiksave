@@ -1,3 +1,32 @@
+
+// ===== PERFORMANCE OPTIMIZATION =====
+// Debounce function untuk optimasi performance
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Throttle function untuk touch events
+function throttle(func, limit) {
+    let inThrottle;
+    return function() {
+        const args = arguments;
+        const context = this;
+        if (!inThrottle) {
+            func.apply(context, args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+        }
+    };
+}
+
 // ===== DOM Elements =====
 const mobileMenuBtn = document.getElementById('mobileMenuBtn');
 const mainNav = document.getElementById('mainNav');
@@ -15,9 +44,58 @@ const statsSummary = document.getElementById('stats-summary');
 let dailyChart = null;
 let monthlyChart = null;
 
-// ===== Navigation =====
+
+// ===== Lazy Loading Implementation =====
+function setupLazyLoading() {
+    const images = document.querySelectorAll('img[data-src]');
+    const videos = document.querySelectorAll('video[data-src]');
+    
+    // Intersection Observer for better performance
+    if ('IntersectionObserver' in window) {
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    img.src = img.dataset.src;
+                    img.classList.add('loaded');
+                    observer.unobserve(img);
+                }
+            });
+        }, {
+            rootMargin: '50px'
+        });
+
+        const videoObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const video = entry.target;
+                    video.src = video.dataset.src;
+                    video.load();
+                    observer.unobserve(video);
+                }
+            });
+        }, {
+            rootMargin: '100px'
+        });
+
+        images.forEach(img => imageObserver.observe(img));
+        videos.forEach(video => videoObserver.observe(video));
+    } else {
+        // Fallback for older browsers
+        images.forEach(img => {
+            img.src = img.dataset.src;
+            img.classList.add('loaded');
+        });
+        videos.forEach(video => {
+            video.src = video.dataset.src;
+            video.load();
+        });
+    }
+}
+
+// ===== Navigation with Performance Optimization =====
 navLinks.forEach(link => {
-    link.addEventListener('click', (e) => {
+    link.addEventListener('click', throttle((e) => {
         e.preventDefault();
         const pageId = link.getAttribute('data-page');
 
@@ -32,6 +110,11 @@ navLinks.forEach(link => {
                 page.classList.add('active');
                 // Scroll to top when switching pages
                 window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                // Setup lazy loading for the new page
+                setTimeout(() => {
+                    setupLazyLoading();
+                }, 100);
             }
         });
 
@@ -44,7 +127,7 @@ navLinks.forEach(link => {
         if (pageId === 'statistics') {
             loadStatistics();
         }
-    });
+    }, 150));
 });
 
 // Toggle mobile menu
@@ -221,6 +304,7 @@ function showDownloadSuccess(filename) {
     }, 4000);
 }
 
+
 // Add CSS animations for notifications
 const style = document.createElement('style');
 style.textContent = `
@@ -243,6 +327,30 @@ style.textContent = `
         to {
             transform: translateX(100%);
             opacity: 0;
+        }
+    }
+    
+    /* Lazy loading styles */
+    .lazy-image {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .lazy-image.loaded {
+        opacity: 1;
+    }
+    
+    /* Performance optimization */
+    .video-player {
+        will-change: transform;
+    }
+    
+    /* Mobile touch optimization */
+    @media (max-width: 768px) {
+        .video-player,
+        .lazy-image {
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
         }
     }
 `;
@@ -777,12 +885,30 @@ function hideError() {
     errorMessage.classList.remove('active');
 }
 
-// ===== Event Listeners =====
+
+// ===== Event Listeners with Performance Optimization =====
+const debouncedDownload = debounce(() => {
+    downloadBtn.click();
+}, 500);
+
+tiktokUrlInput.addEventListener('input', throttle((e) => {
+    // Auto-detect URL format and provide feedback
+    const url = e.target.value.trim();
+    if (url && !url.includes('tiktok.com') && !url.includes('vt.tiktok.com')) {
+        // URL validation feedback could be added here
+    }
+}, 300));
+
 tiktokUrlInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
-        downloadBtn.click();
+        debouncedDownload();
     }
 });
+
+// Enhanced mobile menu toggle with touch optimization
+mobileMenuBtn.addEventListener('click', throttle(() => {
+    mainNav.classList.toggle('active');
+}, 200));
 
 // Focus URL input on page load
 tiktokUrlInput.focus();
