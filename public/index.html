@@ -1846,6 +1846,7 @@
             transition: var(--transition-fast);
         }
 
+
         .animate-pulse {
             animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
@@ -1860,6 +1861,78 @@
             50% {
                 opacity: 0.5;
             }
+        }
+
+        /* ===== DOWNLOAD LOADING STATES ===== */
+        .download-btn-loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .download-btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            margin: auto;
+            border: 2px solid transparent;
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .download-btn-loading .btn-text {
+            visibility: hidden;
+        }
+
+        /* Loading indicator untuk individual download buttons */
+        .download-item-loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        .download-item-loading::before {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            left: 50%;
+            margin-left: -8px;
+            margin-top: -8px;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            z-index: 1;
+        }
+
+        .download-item-loading .btn-text {
+            visibility: hidden;
+        }
+
+        /* Progress bar untuk download */
+        .download-progress {
+            width: 100%;
+            height: 4px;
+            background: var(--gray);
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 1rem 0;
+            display: none;
+        }
+
+        .download-progress.active {
+            display: block;
+        }
+
+        .download-progress-bar {
+            height: 100%;
+            background: var(--gradient-primary);
+            width: 0%;
+            transition: width 0.3s ease;
         }
     </style>
 </head>
@@ -2330,669 +2403,8 @@
         </div>
     </footer>
 
-    <script>
-        // ===== DOM Elements =====
-        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-        const mainNav = document.getElementById('mainNav');
-        const pages = document.querySelectorAll('.page');
-        const navLinks = document.querySelectorAll('.nav-link');
-        const tiktokUrlInput = document.getElementById('tiktok-url');
-        const downloadBtn = document.getElementById('download-btn');
-        const loading = document.getElementById('loading');
-        const errorMessage = document.getElementById('error-message');
-        const errorText = document.getElementById('error-text');
-        const resultContainer = document.getElementById('result-container');
-        const statsSummary = document.getElementById('stats-summary');
 
-        // ===== Chart Instances =====
-        let dailyChart = null;
-        let monthlyChart = null;
-
-        // ===== Navigation =====
-        navLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const pageId = link.getAttribute('data-page');
-
-                // Update active menu
-                navLinks.forEach(nav => nav.classList.remove('active'));
-                link.classList.add('active');
-
-                // Show selected page
-                pages.forEach(page => {
-                    page.classList.remove('active');
-                    if (page.id === `${pageId}-page`) {
-                        page.classList.add('active');
-                        // Scroll to top when switching pages
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }
-                });
-
-                // Close mobile menu if open
-                if (window.innerWidth <= 768) {
-                    mainNav.classList.remove('active');
-                }
-
-                // Load statistics if on statistics page
-                if (pageId === 'statistics') {
-                    loadStatistics();
-                }
-            });
-        });
-
-        // Toggle mobile menu
-        mobileMenuBtn.addEventListener('click', () => {
-            mainNav.classList.toggle('active');
-        });
-
-        // Close mobile menu when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!mainNav.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
-                mainNav.classList.remove('active');
-            }
-        });
-
-        // ===== Download Functionality =====
-        downloadBtn.addEventListener('click', async () => {
-            const url = tiktokUrlInput.value.trim();
-
-            // Validate URL
-            if (!url) {
-                showError('Harap masukkan URL video TikTok');
-                return;
-            }
-
-            // Reset previous state
-            hideError();
-            resultContainer.classList.remove('active');
-
-            // Show loading
-            loading.classList.add('active');
-
-            try {
-                // Send request to server
-                const response = await fetch(`/api/download?url=${encodeURIComponent(url)}`);
-                const data = await response.json();
-
-                // Hide loading
-                loading.classList.remove('active');
-
-                // Check if successful
-                if (!data.ok) {
-                    showError(data.message || 'Gagal mengambil data video TikTok');
-                    return;
-                }
-
-                // Display result
-                displayResult(data);
-            } catch (error) {
-                loading.classList.remove('active');
-                showError('Terjadi kesalahan jaringan. Silakan coba lagi.');
-                console.error('Download error:', error);
-            }
-        });
-
-        // Display result function
-        // ===== VIDEO ASPECT RATIO DETECTION =====
-
-        function detectVideoAspectRatio(videoUrl) {
-            return new Promise((resolve) => {
-                // Cek jika videoUrl valid
-                if (!videoUrl || videoUrl === '') {
-                    resolve({
-                        width: 1080,
-                        height: 1920,
-                        aspectRatio: 0.5625,
-                        ratioClass: 'portrait'
-                    });
-                    return;
-                }
-
-                const video = document.createElement('video');
-                video.src = videoUrl;
-                video.preload = 'metadata';
-                video.crossOrigin = 'anonymous';
-
-                // Timeout untuk mencegah hanging
-                const timeout = setTimeout(() => {
-                    video.remove();
-                    resolve({
-                        width: 1080,
-                        height: 1920,
-                        aspectRatio: 0.5625,
-                        ratioClass: 'portrait'
-                    });
-                }, 5000);
-
-                video.onloadedmetadata = () => {
-                    clearTimeout(timeout);
-                    const width = video.videoWidth;
-                    const height = video.videoHeight;
-                    const aspectRatio = width / height;
-
-                    let ratioClass = 'portrait';
-
-                    // Deteksi rasio aspek
-                    if (aspectRatio >= 1.7) {
-                        ratioClass = 'landscape'; // 16:9 atau lebih lebar
-                    } else if (aspectRatio >= 0.95 && aspectRatio <= 1.05) {
-                        ratioClass = 'square'; // 1:1 (0.95-1.05)
-                    } else if (aspectRatio >= 0.75 && aspectRatio <= 0.85) {
-                        ratioClass = 'ratio-4-5'; // 4:5 (0.8)
-                    } else if (aspectRatio <= 0.65) {
-                        ratioClass = 'portrait'; // 9:16 atau lebih tinggi
-                    } else {
-                        // Untuk rasio lain, gunakan yang paling mendekati
-                        if (Math.abs(aspectRatio - 0.8) < Math.abs(aspectRatio - 0.5625)) {
-                            ratioClass = 'ratio-4-5';
-                        } else {
-                            ratioClass = 'portrait';
-                        }
-                    }
-
-                    video.remove();
-                    resolve({
-                        width,
-                        height,
-                        aspectRatio,
-                        ratioClass
-                    });
-                };
-
-                video.onerror = () => {
-                    clearTimeout(timeout);
-                    video.remove();
-                    resolve({
-                        width: 1080,
-                        height: 1920,
-                        aspectRatio: 0.5625,
-                        ratioClass: 'portrait'
-                    });
-                };
-            });
-        }
-
-        // Perbarui fungsi displayResult untuk menggunakan rasio aspek yang terdeteksi
-        async function displayResult(data) {
-            let html = '';
-
-            if (data.type === 'video') {
-                // Deteksi rasio aspek video
-                let ratioClass = 'portrait'; // default
-                let detectedWidth = 1080;
-                let detectedHeight = 1920;
-
-                try {
-                    const videoInfo = await detectVideoAspectRatio(data.video.no_watermark);
-                    ratioClass = videoInfo.ratioClass;
-                    detectedWidth = videoInfo.width;
-                    detectedHeight = videoInfo.height;
-
-                    console.log(`Video detected: ${detectedWidth}x${detectedHeight}, ratio: ${videoInfo.aspectRatio}, class: ${ratioClass}`);
-                } catch (error) {
-                    console.log('Gagal mendeteksi rasio aspek video:', error);
-                }
-
-                html = `
-            <div class="download-card">
-                <h3 class="text-center mb-4"><i class="fas fa-check-circle text-success"></i> Video Siap Diunduh!</h3>
-                
-                <div class="media-preview">
-                    <div class="video-player-container ${ratioClass}">
-                        <video class="video-player" id="video-player" poster="${data.video.cover}">
-                            <source src="${data.video.no_watermark}" type="video/mp4">
-                            Browser Anda tidak mendukung pemutaran video.
-                        </video>
-                        <div class="play-overlay">
-                            <button class="play-btn" id="play-btn">
-                                <i class="fas fa-play"></i>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="media-info">
-                        <h4 class="mb-3"><i class="fas fa-info-circle text-primary"></i> Informasi Video</h4>
-                        <div class="info-item">
-                            <div class="info-icon">
-                                <i class="fas fa-heading"></i>
-                            </div>
-                            <div class="info-content">
-                                <span class="text-sm text-gray">Judul</span>
-                                <span class="font-semibold">${data.video.title || 'Tidak tersedia'}</span>
-                            </div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-icon">
-                                <i class="fas fa-user"></i>
-                            </div>
-                            <div class="info-content">
-                                <span class="text-sm text-gray">Pembuat Konten</span>
-                                <span class="font-semibold">${data.video.author || 'Tidak tersedia'}</span>
-                            </div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-icon">
-                                <i class="fas fa-globe"></i>
-                            </div>
-                            <div class="info-content">
-                                <span class="text-sm text-gray">Region</span>
-                                <span class="font-semibold">${data.video.region || 'Tidak tersedia'}</span>
-                            </div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-icon">
-                                <i class="fas fa-user-circle"></i>
-                            </div>
-                            <div class="info-content">
-                                <span class="text-sm text-gray">Creator Endpoint</span>
-                                <span class="font-semibold">${data.creator || 'Tidak tersedia'}</span>
-                            </div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-icon">
-                                <i class="fas fa-expand"></i>
-                            </div>
-                            <div class="info-content">
-                                <span class="text-sm text-gray">Resolusi</span>
-                                <span class="font-semibold">${detectedWidth} × ${detectedHeight} (${ratioClass})</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <h4 class="mt-6 mb-3"><i class="fas fa-download text-primary"></i> Pilihan Download</h4>
-                <div class="download-options">
-                    <a href="${data.video.no_watermark}" class="btn btn-primary" download>
-                        <i class="fas fa-video"></i> Video (No Watermark)
-                    </a>
-                    <a href="${data.video.no_watermark_hd}" class="btn btn-secondary" download>
-                        <i class="fas fa-hd"></i> Video HD
-                    </a>
-                    <a href="${data.video.music}" class="btn btn-outline" download>
-                        <i class="fas fa-music"></i> Musik Terpisah
-                    </a>
-                </div>
-                
-                <div class="mt-4 text-center">
-                    <button class="btn btn-sm" onclick="resetForm()">
-                        <i class="fas fa-redo"></i> Download Video Lain
-                    </button>
-                </div>
-            </div>
-        `;
-            } else {
-                // Untuk konten gambar
-                html = `
-            <div class="download-card">
-                <h3 class="text-center mb-4"><i class="fas fa-check-circle text-success"></i> Konten Siap Diunduh!</h3>
-                
-                <div class="media-preview">
-                    <div class="image-container">
-                        <img src="${data.image || data.cover || data.images || ''}" 
-                             alt="Preview" 
-                             class="video-player"
-                             onerror="this.onerror=null; this.src='https://via.placeholder.com/500x500?text=Image+Not+Available'">
-                    </div>
-                    
-                    <div class="media-info">
-                        <h4 class="mb-3"><i class="fas fa-info-circle text-primary"></i> Informasi Konten</h4>
-                        ${data.title ? `
-                        <div class="info-item">
-                            <div class="info-icon">
-                                <i class="fas fa-heading"></i>
-                            </div>
-                            <div class="info-content">
-                                <span class="text-sm text-gray">Judul</span>
-                                <span class="font-semibold">${data.title}</span>
-                            </div>
-                        </div>
-                        ` : ''}
-                        ${data.author ? `
-                        <div class="info-item">
-                            <div class="info-icon">
-                                <i class="fas fa-user"></i>
-                            </div>
-                            <div class="info-content">
-                                <span class="text-sm text-gray">Pembuat</span>
-                                <span class="font-semibold">${data.author}</span>
-                            </div>
-                        </div>
-                        ` : ''}
-                        ${data.region ? `
-                        <div class="info-item">
-                            <div class="info-icon">
-                                <i class="fas fa-globe"></i>
-                            </div>
-                            <div class="info-content">
-                                <span class="text-sm text-gray">Region</span>
-                                <span class="font-semibold">${data.region}</span>
-                            </div>
-                        </div>
-                        ` : ''}
-                    </div>
-                </div>
-                
-                <div class="download-options">
-                    ${data.image || data.cover || data.images ? `
-                    <a href="${data.image || data.cover || data.images}" class="btn btn-primary" download>
-                        <i class="fas fa-image"></i> Download Gambar
-                    </a>
-                    ` : ''}
-                    ${data.music ? `
-                    <a href="${data.music}" class="btn btn-secondary" download>
-                        <i class="fas fa-music"></i> Download Musik
-                    </a>
-                    ` : ''}
-                </div>
-                
-                <div class="mt-4 text-center">
-                    <button class="btn btn-sm" onclick="resetForm()">
-                        <i class="fas fa-redo"></i> Download Konten Lain
-                    </button>
-                </div>
-            </div>
-        `;
-            }
-
-            resultContainer.innerHTML = html;
-            resultContainer.classList.add('active');
-
-            // Add event listeners for video controls
-            const playBtn = document.getElementById('play-btn');
-            const videoPlayer = document.getElementById('video-player');
-
-            if (playBtn && videoPlayer) {
-                playBtn.addEventListener('click', () => {
-                    if (videoPlayer.paused) {
-                        videoPlayer.play();
-                        playBtn.innerHTML = '<i class="fas fa-pause"></i>';
-                    } else {
-                        videoPlayer.pause();
-                        playBtn.innerHTML = '<i class="fas fa-play"></i>';
-                    }
-                });
-
-                videoPlayer.addEventListener('play', () => {
-                    playBtn.innerHTML = '<i class="fas fa-pause"></i>';
-                });
-
-                videoPlayer.addEventListener('pause', () => {
-                    playBtn.innerHTML = '<i class="fas fa-play"></i>';
-                });
-
-                // Auto-play ketika video siap
-                videoPlayer.addEventListener('loadeddata', () => {
-                    // Optional: auto-play setelah sedikit delay
-                    setTimeout(() => {
-                        // videoPlayer.play().catch(e => console.log('Auto-play prevented:', e));
-                    }, 500);
-                });
-            }
-
-            // Scroll to result
-            resultContainer.scrollIntoView({ behavior: 'smooth' });
-        }
-
-        // Reset form function
-        window.resetForm = function () {
-            tiktokUrlInput.value = '';
-            resultContainer.classList.remove('active');
-            tiktokUrlInput.focus();
-        };
-
-        // ===== Statistics Functions =====
-        async function loadStatistics() {
-            try {
-                const response = await fetch('/api/statistik');
-                const data = await response.json();
-
-                if (!data.ok) {
-                    console.error('Gagal memuat statistik');
-                    return;
-                }
-
-                // Update statistics summary
-                updateStatsSummary(data);
-
-                // Create charts
-                createCharts(data);
-            } catch (error) {
-                console.error('Error loading statistics:', error);
-            }
-        }
-
-        function updateStatsSummary(data) {
-            const totalDownloads = data.totalDownloads || 0;
-            const today = new Date().toISOString().split('T')[0];
-            const todayDownloads = data.dailyStats?.data?.[data.dailyStats.data.length - 1] || 0;
-            const thisMonth = new Date().toISOString().slice(0, 7);
-            const thisMonthDownloads = data.monthlyStats?.data?.[data.monthlyStats.data.length - 1] || 0;
-            const dailyAvg = Math.round(data.dailyStats?.data?.reduce((a, b) => a + b, 0) / (data.dailyStats?.data?.length || 1));
-
-            statsSummary.innerHTML = `
-                <div class="stat-card card">
-                    <i class="fas fa-download text-primary text-2xl"></i>
-                    <h3>Total Downloads</h3>
-                    <div class="stat-number">${totalDownloads.toLocaleString()}</div>
-                    <p class="text-gray">Semua waktu</p>
-                </div>
-                
-                <div class="stat-card card">
-                    <i class="fas fa-calendar-day text-primary text-2xl"></i>
-                    <h3>Hari Ini</h3>
-                    <div class="stat-number">${todayDownloads.toLocaleString()}</div>
-                    <p class="text-gray">Downloads hari ini</p>
-                </div>
-                
-                <div class="stat-card card">
-                    <i class="fas fa-calendar-alt text-primary text-2xl"></i>
-                    <h3>Bulan Ini</h3>
-                    <div class="stat-number">${thisMonthDownloads.toLocaleString()}</div>
-                    <p class="text-gray">Downloads bulan ini</p>
-                </div>
-                
-                <div class="stat-card card">
-                    <i class="fas fa-chart-line text-primary text-2xl"></i>
-                    <h3>Rata-rata</h3>
-                    <div class="stat-number">${dailyAvg.toLocaleString()}</div>
-                    <p class="text-gray">Per hari (7 hari)</p>
-                </div>
-            `;
-        }
-
-        function createCharts(data) {
-            const dailyCtx = document.getElementById('dailyChart').getContext('2d');
-            const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
-
-            // Destroy previous charts if they exist
-            if (dailyChart) dailyChart.destroy();
-            if (monthlyChart) monthlyChart.destroy();
-
-            // Daily chart
-            dailyChart = new Chart(dailyCtx, {
-                type: 'line',
-                data: {
-                    labels: data.dailyStats?.labels || [],
-                    datasets: [{
-                        label: 'Downloads',
-                        data: data.dailyStats?.data || [],
-                        borderColor: '#ff0050',
-                        backgroundColor: 'rgba(255, 0, 80, 0.1)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4,
-                        pointBackgroundColor: '#ff0050',
-                        pointBorderColor: '#ffffff',
-                        pointBorderWidth: 2,
-                        pointRadius: 5,
-                        pointHoverRadius: 8
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: '#e0e0e0',
-                                font: {
-                                    size: 12
-                                }
-                            }
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(15, 15, 15, 0.9)',
-                            titleColor: '#ffffff',
-                            bodyColor: '#e0e0e0',
-                            borderColor: '#ff0050',
-                            borderWidth: 1,
-                            cornerRadius: 8
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
-                            },
-                            ticks: {
-                                color: '#aaaaaa',
-                                font: {
-                                    size: 11
-                                }
-                            }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
-                            },
-                            ticks: {
-                                color: '#aaaaaa',
-                                font: {
-                                    size: 11
-                                },
-                                callback: function (value) {
-                                    return value.toLocaleString();
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Monthly chart
-            monthlyChart = new Chart(monthlyCtx, {
-                type: 'bar',
-                data: {
-                    labels: data.monthlyStats?.labels || [],
-                    datasets: [{
-                        label: 'Downloads',
-                        data: data.monthlyStats?.data || [],
-                        backgroundColor: 'rgba(0, 242, 234, 0.7)',
-                        borderColor: '#00f2ea',
-                        borderWidth: 2,
-                        borderRadius: 6,
-                        hoverBackgroundColor: 'rgba(0, 242, 234, 0.9)'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: '#e0e0e0',
-                                font: {
-                                    size: 12
-                                }
-                            }
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(15, 15, 15, 0.9)',
-                            titleColor: '#ffffff',
-                            bodyColor: '#e0e0e0',
-                            borderColor: '#00f2ea',
-                            borderWidth: 1,
-                            cornerRadius: 8
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
-                            },
-                            ticks: {
-                                color: '#aaaaaa',
-                                font: {
-                                    size: 11
-                                }
-                            }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
-                            },
-                            ticks: {
-                                color: '#aaaaaa',
-                                font: {
-                                    size: 11
-                                },
-                                callback: function (value) {
-                                    return value.toLocaleString();
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // ===== Error Handling =====
-        function showError(message) {
-            errorText.textContent = message;
-            errorMessage.classList.add('active');
-            errorMessage.scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function hideError() {
-            errorMessage.classList.remove('active');
-        }
-
-        // ===== Event Listeners =====
-        tiktokUrlInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                downloadBtn.click();
-            }
-        });
-
-        // Focus URL input on page load
-        tiktokUrlInput.focus();
-
-        // Load statistics if on statistics page on initial load
-        document.addEventListener('DOMContentLoaded', () => {
-            // Check URL hash for page
-            if (window.location.hash) {
-                const pageId = window.location.hash.substring(1);
-                const link = document.querySelector(`[data-page="${pageId}"]`);
-                if (link) link.click();
-            }
-
-            // Load statistics if on statistics page
-            const activePage = document.querySelector('.page.active');
-            if (activePage && activePage.id === 'statistics-page') {
-                loadStatistics();
-            }
-        });
-
-        // Update statistics every 30 seconds when on statistics page
-        setInterval(() => {
-            const activePage = document.querySelector('.page.active');
-            if (activePage && activePage.id === 'statistics-page') {
-                loadStatistics();
-            }
-        }, 30000);
-    </script>
+    <script src="script.js"></script>
 </body>
 
 </html>
