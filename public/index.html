@@ -14,8 +14,11 @@
     <meta name="apple-mobile-web-app-title" content="TikSave">
     <title>Tiksave - Unduh Video TikTok Tanpa Watermark</title>
     <link rel="favicon" href="favicon.ico">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
     <style>
         /* ===== RESET & BASE STYLES ===== */
         * {
@@ -1176,7 +1179,8 @@
             }
         }
 
-        /* Fix untuk tabel documentation */
+
+        /* Fix untuk tabel documentation - Enhanced Mobile Support */
         .param-table-container {
             width: 100%;
             overflow-x: auto;
@@ -1184,20 +1188,71 @@
             -webkit-overflow-scrolling: touch;
             border: 1px solid var(--gray);
             border-radius: var(--border-radius-sm);
+            position: relative;
+            background: var(--dark-light);
+        }
+
+        /* Visual indicator for scrollable content */
+        .param-table-container::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 20px;
+            background: linear-gradient(to left, var(--dark-light), transparent);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .param-table-container.scrollable::after {
+            opacity: 1;
         }
 
         .param-table {
             width: 100%;
-            min-width: 700px;
+            min-width: 600px;
             border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        @media (max-width: 768px) {
+            .param-table {
+                min-width: 500px;
+                font-size: 0.8125rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .param-table {
+                min-width: 450px;
+                font-size: 0.75rem;
+            }
         }
 
         .param-table th,
         .param-table td {
-            padding: 1rem;
+            padding: 0.875rem;
             text-align: left;
             border-bottom: 1px solid var(--gray);
             vertical-align: top;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        @media (max-width: 768px) {
+            .param-table th,
+            .param-table td {
+                padding: 0.625rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .param-table th,
+            .param-table td {
+                padding: 0.5rem;
+            }
         }
 
         .param-table th {
@@ -1207,11 +1262,12 @@
             white-space: nowrap;
             position: sticky;
             left: 0;
+            z-index: 10;
+            box-shadow: 2px 0 0 var(--gray);
         }
 
         .param-table td {
             color: var(--text-secondary);
-            font-size: 0.9375rem;
             line-height: 1.5;
         }
 
@@ -1219,6 +1275,19 @@
             font-family: 'Courier New', monospace;
             color: var(--secondary);
             background: rgba(0, 242, 234, 0.05);
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .param-table .param-description {
+            max-width: 300px;
+            word-break: break-word;
+        }
+
+        @media (max-width: 768px) {
+            .param-table .param-description {
+                max-width: 200px;
+            }
         }
 
         /* Scrollbar styling untuk tabel */
@@ -1240,25 +1309,237 @@
             background: var(--primary-dark);
         }
 
-        /* Code block improvements for mobile */
+
+        /* Code block improvements with copy button */
+        .code-block-container {
+            position: relative;
+            margin: 1.5rem 0;
+            border-radius: var(--border-radius-sm);
+            overflow: hidden;
+            border: 1px solid var(--gray);
+            background: var(--dark-light);
+        }
+
+        .code-block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background: var(--darker);
+            border-bottom: 1px solid var(--gray);
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .code-language {
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .copy-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.375rem 0.75rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: inherit;
+        }
+
+        .copy-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .copy-btn:active {
+            transform: translateY(0);
+        }
+
+        .copy-btn.copied {
+            background: var(--success);
+        }
+
+        .copy-btn i {
+            font-size: 0.625rem;
+        }
+
+
         .code-block {
             background: var(--darker);
-            border-radius: var(--border-radius-sm);
             padding: 1rem;
             font-family: 'Courier New', monospace;
             overflow-x: auto;
-            margin: 1rem 0;
-            border: 1px solid var(--gray);
             font-size: 0.8125rem;
             line-height: 1.5;
             -webkit-overflow-scrolling: touch;
+            max-width: 100%;
+            /* Limit maximum width */
+            max-height: 400px;
+            /* Prevent overly tall blocks */
+            overflow-y: auto;
+            position: relative;
+            /* Ensure code blocks don't exceed container width */
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+
+
+
+
+        /* Special handling for JavaScript and Python code examples */
+        .example-grid .code-block {
+            max-width: 100%;
+            overflow-x: auto;
+            /* Add horizontal scroll for long lines */
+            white-space: pre-wrap;
+            /* Allow wrapping while preserving formatting */
+            word-break: break-word;
+            /* Break long words and URLs */
+            min-width: 0;
+            /* Allow shrinking below content width */
+            width: 100%;
+            box-sizing: border-box;
+            /* Better mobile scrolling */
+            -webkit-overflow-scrolling: touch;
+            /* Prevent horizontal overflow */
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+
+        /* Force horizontal scroll for mobile on JS/Python examples */
+        @media (max-width: 768px) {
+            .example-grid .code-block {
+                font-size: 0.75rem;
+                padding: 0.75rem;
+                max-height: 300px;
+                /* Ensure horizontal scroll on mobile */
+                overflow-x: auto;
+                overflow-y: auto;
+                /* Critical: Prevent width overflow */
+                max-width: 100%;
+                width: 100%;
+                box-sizing: border-box;
+                /* Better text wrapping for mobile */
+                white-space: pre-wrap;
+                word-break: break-word;
+                /* Improve mobile scrolling */
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            /* Ensure example grid containers don't overflow */
+            .example-grid {
+                width: 100%;
+                overflow-x: hidden;
+                /* Better grid layout on mobile */
+                display: block;
+            }
+            
+            .example-grid > div {
+                width: 100%;
+                max-width: 100%;
+                overflow-x: hidden;
+                margin-bottom: 1.5rem;
+                /* Stack vertically on mobile */
+                display: block;
+            }
+        }
+
+
+        /* Extra small mobile screens */
+        @media (max-width: 480px) {
+            .example-grid .code-block {
+                font-size: 0.6875rem;
+                padding: 0.625rem;
+                max-height: 250px;
+                /* Better width control on very small screens */
+                max-width: 100%;
+                width: 100%;
+                box-sizing: border-box;
+                /* Better text wrapping for very small screens */
+                white-space: pre-wrap;
+                word-break: break-word;
+                /* Improve touch scrolling */
+                -webkit-overflow-scrolling: touch;
+                /* Prevent horizontal overflow */
+                overflow-x: auto;
+                overflow-y: auto;
+            }
+            
+            /* Stack example cards vertically on very small screens */
+            .example-grid > div {
+                margin-bottom: 1rem;
+            }
+        }
+
+        .code-block::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 20px;
+            height: 100%;
+            background: linear-gradient(to left, var(--darker), transparent);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .code-block-container.scrollable .code-block::before {
+            opacity: 1;
         }
 
         @media (min-width: 768px) {
             .code-block {
                 font-size: 0.875rem;
                 padding: 1.5rem;
+                max-height: 500px;
             }
+            
+            .code-block-header {
+                padding: 1rem 1.5rem;
+                font-size: 0.875rem;
+            }
+            
+            .copy-btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.875rem;
+            }
+        }
+
+        /* Ensure code blocks are contained properly */
+        .code-wrapper {
+            position: relative;
+            background: var(--dark-light);
+            border-radius: var(--border-radius-sm);
+            overflow: hidden;
+        }
+
+        /* Scrollbar styling for code blocks */
+        .code-block::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+
+        .code-block::-webkit-scrollbar-track {
+            background: var(--gray);
+            border-radius: 4px;
+        }
+
+        .code-block::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        .code-block::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
         }
 
         /* Improved example usage section for mobile */
@@ -1305,24 +1586,8 @@
             }
         }
 
-        /* Scrollbar styling for tables and code blocks */
-        .code-block::-webkit-scrollbar {
-            height: 6px;
-        }
 
-        .code-block::-webkit-scrollbar-track {
-            background: var(--darker);
-            border-radius: 3px;
-        }
 
-        .code-block::-webkit-scrollbar-thumb {
-            background: var(--primary);
-            border-radius: 3px;
-        }
-
-        .code-block::-webkit-scrollbar-thumb:hover {
-            background: var(--primary-dark);
-        }
 
         /* Improved mobile readability */
         .endpoint-desc {
@@ -2297,11 +2562,20 @@
                     </div>
                 </div>
 
+
+
                 <div class="api-card mt-6">
                     <h3 class="mb-3"><i class="fas fa-database text-primary"></i> API yang Digunakan</h3>
                     <p>Kami menggunakan API dari <strong>Endpoint Hub</strong> untuk mengambil data video TikTok:</p>
-                    <div class="code-block">
-                        https://endpoint-hub.up.railway.app/api/downloader/tiktok?prompt={URL_TIKTOK}
+                    <div class="code-block-container">
+                        <div class="code-block-header">
+                            <span class="code-language">bash</span>
+                            <button class="copy-btn" onclick="copyCode(this)">
+                                <i class="fas fa-copy"></i>
+                                Copy
+                            </button>
+                        </div>
+                        <pre class="code-block"><code class="language-bash">https://endpoint-hub.up.railway.app/api/downloader/tiktok?prompt={URL_TIKTOK}</code></pre>
                     </div>
                     <p class="text-sm text-gray">API ini menyediakan data lengkap video TikTok termasuk URL download
                         tanpa watermark, cover image, dan audio terpisah.</p>
@@ -2437,51 +2711,70 @@
                         </div>
                         <p class="mb-3">Endpoint untuk mengambil data video TikTok berdasarkan URL.</p>
 
-                        <h4 class="mb-2">Parameter:</h4>
-                        <table class="param-table">
-                            <thead>
-                                <tr>
-                                    <th>Parameter</th>
-                                    <th>Tipe</th>
-                                    <th>Wajib</th>
-                                    <th>Deskripsi</th>
-                                    <th>Response</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td><code>url</code></td>
-                                    <td>String</td>
-                                    <td>Ya</td>
-                                    <td style="overflow-x: auto;">URL video TikTok yang valid (contoh:
-                                        https://vt.tiktok.com/ZSfsDhoBk/)</td>
-                                    <td>JSON{}</td>
-                                </tr>
-                            </tbody>
-                        </table>
 
-                        <h4 class="mt-4 mb-2">Contoh Request:</h4>
-                        <div class="code-block">
-                            GET /api/download?url=https://vt.tiktok.com/ZSfsDhoBk/
+                        <h4 class="mb-2">Parameter:</h4>
+                        <div class="param-table-container">
+                            <table class="param-table">
+                                <thead>
+                                    <tr>
+                                        <th>Parameter</th>
+                                        <th>Tipe</th>
+                                        <th>Wajib</th>
+                                        <th>Deskripsi</th>
+                                        <th>Response</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><code>url</code></td>
+                                        <td>String</td>
+                                        <td>Ya</td>
+                                        <td class="param-description">URL video TikTok yang valid (contoh:
+                                            https://vt.tiktok.com/ZSfsDhoBk/)</td>
+                                        <td>JSON{}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
 
+
+                        <h4 class="mt-4 mb-2">Contoh Request:</h4>
+                        <div class="code-block-container">
+                            <div class="code-block-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">
+                                    <i class="fas fa-copy"></i>
+                                    Copy
+                                </button>
+                            </div>
+                            <pre class="code-block"><code class="language-bash">GET /api/download?url=https://vt.tiktok.com/ZSfsDhoBk/</code></pre>
+                        </div>
+
+
                         <h4 class="mt-4 mb-2">Contoh Response:</h4>
-                        <div class="code-block">
-                            {
-                            "ok": true,
-                            "type": "video",
-                            "creator": "Farel Alfareza",
-                            "prompt": "https://vt.tiktok.com/ZSfsDhoBk/",
-                            "video": {
-                            "title": "arti arti secret kode #fyp ",
-                            "author": "5 DESEMBER GUE ULTAH",
-                            "region": "ID",
-                            "cover": "https://p16-sign-va.tiktokcdn.com/...",
-                            "no_watermark": "https://v16m.tiktokcdn.com/...",
-                            "no_watermark_hd": "https://v16m-default.tiktokcdn.com/...",
-                            "music": "https://v19-ies-music.tiktokcdn.com/..."
-                            }
-                            }
+                        <div class="code-block-container">
+                            <div class="code-block-header">
+                                <span class="code-language">json</span>
+                                <button class="copy-btn" onclick="copyCode(this)">
+                                    <i class="fas fa-copy"></i>
+                                    Copy
+                                </button>
+                            </div>
+                            <pre class="code-block"><code class="language-json">{
+  "ok": true,
+  "type": "video",
+  "creator": "Farel Alfareza",
+  "prompt": "https://vt.tiktok.com/ZSfsDhoBk/",
+  "video": {
+    "title": "arti arti secret kode #fyp ",
+    "author": "5 DESEMBER GUE ULTAH",
+    "region": "ID",
+    "cover": "https://p16-sign-va.tiktokcdn.com/...",
+    "no_watermark": "https://v16m.tiktokcdn.com/...",
+    "no_watermark_hd": "https://v16m-default.tiktokcdn.com/...",
+    "music": "https://v19-ies-music.tiktokcdn.com/..."
+  }
+}</code></pre>
                         </div>
                     </div>
 
@@ -2493,20 +2786,29 @@
                         </div>
                         <p class="mb-3">Endpoint untuk mengambil data statistik penggunaan platform.</p>
 
+
+
                         <h4 class="mt-4 mb-2">Contoh Response:</h4>
-                        <div class="code-block">
-                            {
-                            "ok": true,
-                            "totalDownloads": 1250,
-                            "dailyStats": {
-                            "labels": ["2023-12-05", "2023-12-06", "2023-12-07", ...],
-                            "data": [45, 67, 89, ...]
-                            },
-                            "monthlyStats": {
-                            "labels": ["2023-07", "2023-08", "2023-09", ...],
-                            "data": [450, 520, 600, ...]
-                            }
-                            }
+                        <div class="code-block-container">
+                            <div class="code-block-header">
+                                <span class="code-language">json</span>
+                                <button class="copy-btn" onclick="copyCode(this)">
+                                    <i class="fas fa-copy"></i>
+                                    Copy
+                                </button>
+                            </div>
+                            <pre class="code-block"><code class="language-json">{
+  "ok": true,
+  "totalDownloads": 1250,
+  "dailyStats": {
+    "labels": ["2023-12-05", "2023-12-06", "2023-12-07", ...],
+    "data": [45, 67, 89, ...]
+  },
+  "monthlyStats": {
+    "labels": ["2023-07", "2023-08", "2023-09", ...],
+    "data": [450, 520, 600, ...]
+  }
+}</code></pre>
                         </div>
                     </div>
                 </div>
@@ -2515,35 +2817,181 @@
                     <h3 class="mb-3"><i class="fas fa-code text-primary"></i> Contoh Penggunaan</h3>
 
                     <div class="grid grid-2 gap-6">
+
+
                         <div>
                             <h4 class="mb-2">JavaScript (Fetch API)</h4>
-                            <div class="code-block">
-                                // Mengambil data video TikTok
-                                fetch('/api/download?url=https://vt.tiktok.com/ZSfsDhoBk/')
-                                .then(response => response.json())
-                                .then(data => {
-                                if (data.ok) {
-                                console.log('Judul:', data.video.title);
-                                console.log('Download URL:', data.video.no_watermark);
-                                }
-                                });
+                            <div class="code-block-container">
+                                <div class="code-block-header">
+                                    <span class="code-language">javascript</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">
+                                        <i class="fas fa-copy"></i>
+                                        Copy
+                                    </button>
+                                </div>
+                                <pre class="code-block"><code class="language-javascript">// Mengambil data video TikTok
+fetch('/api/download?url=https://vt.tiktok.com/ZSfsDhoBk/')
+  .then(response => response.json())
+  .then(data => {
+    if (data.ok) {
+      console.log('Judul:', data.video.title);
+      console.log('Download URL:', data.video.no_watermark);
+    }
+  });</code></pre>
                             </div>
                         </div>
+
+
                         <div>
                             <h4 class="mb-2">Python (Requests)</h4>
-                            <div class="code-block">
-                                import requests
+                            <div class="code-block-container">
+                                <div class="code-block-header">
+                                    <span class="code-language">python</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">
+                                        <i class="fas fa-copy"></i>
+                                        Copy
+                                    </button>
+                                </div>
+                                <pre class="code-block"><code class="language-python">import requests
 
-                                url = "https://localhost:8080/api/download"
-                                params = {"url": "https://vt.tiktok.com/ZSfsDhoBk/"}
-                                response = requests.get(url, params=params)
-                                data = response.json()
+url = "https://localhost:8080/api/download"
+params = {"url": "https://vt.tiktok.com/ZSfsDhoBk/"}
+response = requests.get(url, params=params)
+data = response.json()
 
-                                if data.get("ok"):
-                                print(f"Judul: {data['video']['title']}")
-                                print(f"URL Download: {data['video']['no_watermark']}")
+if data.get("ok"):
+    print(f"Judul: {data['video']['title']}")
+    print(f"URL Download: {data['video']['no_watermark']}")</code></pre>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Contoh Response dengan Teks Panjang -->
+                <div class="mt-8">
+                    <h3 class="mb-3"><i class="fas fa-scroll text-primary"></i> Contoh Response dengan Teks Panjang</h3>
+                    <p class="text-gray mb-4">Contoh response API dengan data teks yang panjang dan dapat di-scroll secara horizontal tanpa membuat layout berantakan:</p>
+                    
+
+
+                    <div class="code-block-container">
+                        <div class="code-block-header">
+                            <span class="code-language">json</span>
+                            <button class="copy-btn" onclick="copyCode(this)">
+                                <i class="fas fa-copy"></i>
+                                Copy
+                            </button>
+                        </div>
+                        <pre class="code-block"><code class="language-json">{
+  "ok": true,
+  "type": "video",
+  "creator": "Content Creator dengan Nama yang Sangat Panjang Sekali dan Tidak Biasa",
+  "description": "Ini adalah deskripsi video yang sangat panjang sekali dan contain berbagai informasi detail tentang konten video TikTok yang diunduh termasuk hashtag yang banyak sekali seperti #fyp #foryou #viral #trending #tiktok #indonesia #lucu #menghibur #konten #kreasi #original #独特 #有趣 #病毒式传播 #印尼 #创意 #原创内容",
+  "prompt": "https://vt.tiktok.com/ZSfsDhoBk/",
+  "video": {
+    "title": "Video TikTok dengan Judul yang Sangat Panjang Sekali dan Mengandung Banyak Informasi Detail Tentang Konten Video Ini Agar Dapat Menguji Bagaimana Responsivitas Horizontal Scroll Pada Block Code",
+    "author": "Nama Author dengan Title dan Deskripsi yang Sangat Panjang Sekali Termasuk Informasi Profil, Bio, dan Detail Lainnya yang Membutuhkan Ruang Lebih",
+    "region": "ID",
+    "cover": "https://p16-sign-va.tiktokcdn.com/tos-useast2a-pve-0068-euttp/o8AE4eQIgD3B5gB9e9Q3rQ2A3zQ5A7B6C5D4E3F2G1H0I9J8K7L6M5N4O3P2Q1R0S9T8U7V6W5X4Y3Z2A1B0C9D8E7F6G5H4I3J2K1L0M9N8O7P6Q5R4S3T2U1V0W9X8Y7Z6A5B4C3D2E1F0G9H8I7J6K5L4M3N2O1P0Q9R8S7T6U5V4W3X2Y1Z0",
+    "no_watermark": "https://v16m.tiktokcdn.com/video/TikTokVideo Dengan URL yang Sangat Panjang Sekali dan Contain Informasi Detail Including Query Parameters Dan Data Lainnya Yang Diperlukan Untuk Download Video Tanpa Watermark Dengan Kualitas HD",
+    "no_watermark_hd": "https://v16m-default.tiktokcdn.com/Video HD URL Dengan Path yang Sangat Panjang dan Contain Banyak Query Parameters Including Access Token, Expiration Time, Quality Settings, dan Informasi Metadata Lainnya Yang Diperlukan Untuk Streaming Video HD",
+    "music": "https://v19-ies-music.tiktokcdn.com/Audio URL dengan Format yang Sangat Panjang dan Detail Including Artist Name, Song Title, Album Information, Duration, Bitrate, dan File Size Information"
+  },
+  "metadata": {
+    "video_id": "video_id_yang_sangat_panjang_sekali_dengan_format_khusus_tiktok",
+    "create_time": 1703123456,
+    "duration": 67,
+    "height": 1920,
+    "width": 1080,
+    "fps": 30,
+    "bitrate": 2500000,
+    "quality_label": "1080p",
+    "codec_name": "h264",
+    "has_watermark": false,
+    "download_count": 1250,
+    "view_count": 15420,
+    "like_count": 890,
+    "comment_count": 45,
+    "share_count": 23,
+    "is_commercial": false,
+    "language": "id",
+    "region_lock": false,
+    "available_regions": ["ID", "US", "MY", "SG", "TH", "VN", "PH", "BN", "KH", "LA", "MM"]
+  },
+  "author_info": {
+    "user_id": "user_id_yang_sangat_panjang_dengan_format_khusus",
+    "username": "content_creator_dengan_nama_yang_sangat_panjang_sekali",
+    "nickname": "Content Creator Premium dengan Badge Verifikasi dan Status Khusus",
+    "avatar": "https://p16-sign-va.tiktokcdn.com/user-avatar-url-yang-sangat-panjang-dengan-informasi-detail-tentang-profile-picture",
+    "signature": "Bio profile yang sangat panjang sekali dan contain informasi detail tentang creator ini termasuk deskripsi konten, specializations, achievements, collaborations, dan informasi lainnya yang membantu followers了解 creator ini lebih baik lagi",
+    "verified": true,
+    "verified_type": "enterprise",
+    "follower_count": 125000,
+    "following_count": 450,
+    "likes_count": 2340000,
+    "video_count": 156,
+    "is_private": false,
+    "is_business": true,
+    "business_info": {
+      "contact_email": "creator@example.com",
+      "website": "https://creator-website-yang-sangat-panjang-dengan-domain-complicated.com",
+      "location": "Jakarta, Indonesia",
+      "category": "Entertainment & Lifestyle",
+      "subcategory": "Comedy & Social Content Creation",
+      "established_year": 2020,
+      "collaboration_brands": ["Brand A dengan Nama yang Panjang", "Brand B dengan Deskripsi Detail", "Brand C dengan Informasi Komprehensif"]
+    }
+  },
+  "hashtags": [
+    "#fyp - For You Page viral content",
+    "#foryou - Recommended algorithm content",
+    "#viral - Trending viral videos",
+    "#trending - Currently trending topics",
+    "#tiktok - TikTok official hashtag",
+    "#indonesia - Indonesian content",
+    "#lucu - Funny Indonesian content",
+    "#menghibur - Entertainment content",
+    "#konten - Content creation",
+    "#kreasi - Creative content",
+    "#original - Original content",
+    "#独特 - Unique Chinese content",
+    "#有趣 - Funny Chinese content",
+    "#病毒式传播 - Viral spread Chinese",
+    "#印尼 - Indonesian Chinese",
+    "#创意 - Creative Chinese",
+    "#原创内容 - Original content Chinese"
+  ],
+  "mentions": [
+    {
+      "user_id": "mentioned_user_id_yang_sangat_panjang",
+      "username": "mentioned_user_dengan_nama_yang_panjang",
+      "display_name": "Mentioned User dengan Nama Lengkap dan Title",
+      "is_verified": true
+    }
+  ],
+  "effects": [
+    {
+      "effect_id": "effect_id_yang_sangat_panjang_dengan_format_khusus",
+      "effect_name": "Effect Name yang Sangat Panjang dengan Deskripsi Detail",
+      "effect_description": "Deskripsi effect yang sangat detail dan panjang termasuk cara penggunaan, trend information, popular creators yang menggunakan effect ini, dan informasi teknis lainnya",
+      "creator": "Effect Creator dengan nama yang panjang",
+      "is_trending": true,
+      "usage_count": 15420,
+      "category": "Beauty & Fashion"
+    }
+  ]
+}</code></pre>
+                    </div>
+                    
+                    <div class="mt-4 p-4" style="background: rgba(16, 185, 129, 0.1); border-left: 4px solid var(--success); border-radius: var(--border-radius-sm);">
+                        <h4 class="text-success mb-2"><i class="fas fa-info-circle"></i> Fitur Horizontal Scroll</h4>
+                        <ul class="text-sm text-gray space-y-1">
+                            <li>• Teks panjang dalam response akan ter-scroll secara horizontal</li>
+                            <li>• Layout tetap rapi tanpa破坏了 tampilan</li>
+                            <li>• Scrollbar muncul otomatis ketika diperlukan</li>
+                            <li>• Kompatibel dengan desktop dan mobile device</li>
+                            <li>• CSS styling yang konsisten dengan tema aplikasi</li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -2614,7 +3062,184 @@
     </footer>
 
 
+
     <script src="script.js"></script>
+    
+
+    <!-- Highlight.js Initialization -->
+    <script>
+        // Function to copy code to clipboard
+        function copyCode(button) {
+            const container = button.closest('.code-block-container');
+            const codeBlock = container.querySelector('.code-block code');
+            const codeText = codeBlock.textContent;
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(codeText).then(function() {
+                // Success feedback
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                button.classList.add('copied');
+                
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+            }).catch(function(err) {
+                console.error('Could not copy text: ', err);
+                
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = codeText;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                    button.classList.add('copied');
+                    setTimeout(() => {
+                        button.innerHTML = originalText;
+                        button.classList.remove('copied');
+                    }, 2000);
+                } catch (fallbackErr) {
+                    console.error('Fallback copy failed: ', fallbackErr);
+                }
+                document.body.removeChild(textArea);
+            });
+        }
+
+
+
+
+        // Function to constrain code block width on mobile
+        function constrainCodeBlockWidth() {
+            const isMobile = window.innerWidth <= 768;
+            const exampleCodeBlocks = document.querySelectorAll('.example-grid .code-block');
+            
+            exampleCodeBlocks.forEach(codeBlock => {
+                if (isMobile) {
+                    // Get the parent container width
+                    const parentContainer = codeBlock.closest('.example-grid');
+                    const parentDiv = codeBlock.closest('.example-grid > div');
+                    
+                    if (parentContainer && parentDiv) {
+                        const containerWidth = parentDiv.clientWidth;
+                        const padding = 32; // Account for container padding
+                        const maxWidth = containerWidth - padding;
+                        
+                        // Set maximum width to prevent overflow
+                        codeBlock.style.maxWidth = Math.max(maxWidth, 280) + 'px';
+                        codeBlock.style.overflowX = 'auto';
+                        codeBlock.style.overflowY = 'auto';
+                        
+                        // Add mobile-specific class
+                        codeBlock.classList.add('mobile-constrained');
+                        
+                        // Ensure proper text wrapping for mobile
+                        codeBlock.style.whiteSpace = 'pre-wrap';
+                        codeBlock.style.wordBreak = 'break-word';
+                        
+                        // Add touch scrolling support
+                        codeBlock.style.webkitOverflowScrolling = 'touch';
+                        
+                        console.log('Mobile constraints applied:', {
+                            containerWidth,
+                            maxWidth: Math.max(maxWidth, 280),
+                            isMobile
+                        });
+                    }
+                } else {
+                    // Remove constraints on desktop
+                    codeBlock.style.maxWidth = '';
+                    codeBlock.classList.remove('mobile-constrained');
+                    
+                    // Reset text wrapping for desktop
+                    codeBlock.style.whiteSpace = 'pre-wrap';
+                    codeBlock.style.wordBreak = 'break-word';
+                    
+                    console.log('Desktop constraints applied');
+                }
+            });
+        }
+
+
+        // Initialize highlight.js when page is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Apply syntax highlighting to all code blocks
+            if (typeof hljs !== 'undefined') {
+                hljs.highlightAll();
+            }
+            
+            // Apply width constraints for mobile code blocks
+            constrainCodeBlockWidth();
+            
+            // Re-apply constraints on window resize
+            window.addEventListener('resize', function() {
+                setTimeout(constrainCodeBlockWidth, 100);
+            });
+            
+            // Re-apply constraints after a short delay to ensure DOM is fully loaded
+            setTimeout(constrainCodeBlockWidth, 500);
+            
+            // Add scroll detection for code blocks
+            const codeContainers = document.querySelectorAll('.code-block-container');
+            codeContainers.forEach(container => {
+                const codeBlock = container.querySelector('.code-block');
+                
+                // Check if content is scrollable
+                const checkScrollable = () => {
+                    if (codeBlock.scrollWidth > codeBlock.clientWidth || codeBlock.scrollHeight > codeBlock.clientHeight) {
+                        container.classList.add('scrollable');
+                    } else {
+                        container.classList.remove('scrollable');
+                    }
+                };
+                
+                // Check on load and resize
+                checkScrollable();
+                window.addEventListener('resize', checkScrollable);
+                
+                // Add scroll event listener
+                codeBlock.addEventListener('scroll', function() {
+                    // Optional: Add scroll position handling
+                    console.log('Code block scrolled');
+                });
+            });
+            
+            // Add scroll detection for param tables
+            const paramTables = document.querySelectorAll('.param-table-container');
+            paramTables.forEach(container => {
+                // Check if content is scrollable
+                const checkScrollable = () => {
+                    if (container.scrollWidth > container.clientWidth) {
+                        container.classList.add('scrollable');
+                    } else {
+                        container.classList.remove('scrollable');
+                    }
+                };
+                
+                // Check on load and resize
+                checkScrollable();
+                window.addEventListener('resize', checkScrollable);
+                
+                // Add scroll event listener
+                container.addEventListener('scroll', function() {
+                    // Optional: Add scroll position handling
+                    console.log('Table scrolled');
+                });
+            });
+            
+            // Enhanced code block scrolling for mobile
+            const codeBlocks = document.querySelectorAll('pre code');
+            codeBlocks.forEach(block => {
+                // Add touch-friendly scrolling for mobile
+                if ('ontouchstart' in window) {
+                    block.style.webkitOverflowScrolling = 'touch';
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>
