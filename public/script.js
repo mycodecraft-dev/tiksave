@@ -1,4 +1,3 @@
-
 // ===== PERFORMANCE OPTIMIZATION =====
 // Debounce function untuk optimasi performance
 function debounce(func, wait) {
@@ -94,12 +93,15 @@ function setupLazyLoading() {
 }
 
 
+
+
 // ===== SIDEBAR MANAGEMENT =====
 class SidebarManager {
     constructor() {
         this.mobileMenuBtn = document.getElementById('mobileMenuBtn');
         this.mainNav = document.getElementById('mainNav');
         this.navLinks = document.querySelectorAll('.nav-link');
+        this.footerLinks = document.querySelectorAll('.footer-links a');
         this.pages = document.querySelectorAll('.page');
         this.isMenuOpen = false;
         this.isTransitioning = false;
@@ -107,12 +109,12 @@ class SidebarManager {
         this.init();
     }
 
-
     init() {
         this.setupEventListeners();
         this.setupKeyboardNavigation();
         this.setupTouchGestures();
         this.setupAccessibility();
+        this.setupFooterLinks();
         this.setupStatisticsAutoRefresh();
         this.handleInitialLoad();
     }
@@ -213,6 +215,7 @@ class SidebarManager {
         }, { passive: true });
     }
 
+
     setupAccessibility() {
         // Set ARIA attributes
         this.mobileMenuBtn.setAttribute('aria-label', 'Toggle navigation menu');
@@ -235,6 +238,36 @@ class SidebarManager {
                 link.appendChild(srText);
             }
 
+        });
+    }
+
+    setupFooterLinks() {
+        // Setup event listeners for footer links
+        this.footerLinks.forEach((link, index) => {
+            link.addEventListener('click', this.throttle((e) => {
+                e.preventDefault();
+                this.navigateToPage(link);
+            }, 100));
+
+            // Enhanced touch support
+            link.addEventListener('touchstart', (e) => {
+                this.addTouchFeedback(e.target);
+            }, { passive: true });
+
+            link.addEventListener('touchend', (e) => {
+                this.removeTouchFeedback(e.target);
+            }, { passive: true });
+
+            // Keyboard navigation support
+            link.addEventListener('keydown', (e) => {
+                switch (e.key) {
+                    case 'Enter':
+                    case ' ':
+                        e.preventDefault();
+                        this.navigateToPage(link);
+                        break;
+                }
+            });
         });
     }
 
@@ -300,6 +333,7 @@ class SidebarManager {
         }, 300);
     }
 
+
     updateActiveStates(activeLink) {
         // Update nav links
         this.navLinks.forEach(nav => {
@@ -307,8 +341,48 @@ class SidebarManager {
             nav.setAttribute('aria-current', 'false');
         });
         
+        // Update footer links
+        this.footerLinks.forEach(footer => {
+            footer.classList.remove('active');
+            footer.setAttribute('aria-current', 'false');
+        });
+        
+        // Set active state for the clicked link
         activeLink.classList.add('active');
         activeLink.setAttribute('aria-current', 'page');
+        
+        // Sync active states between header and footer
+        this.syncActiveStates(activeLink.getAttribute('data-page'));
+    }
+
+
+    syncActiveStates(pageId) {
+        // Sync active states between header and footer navigation
+        if (pageId) {
+            // Find corresponding links in header and footer
+            const headerLink = document.querySelector(`.nav-link[data-page="${pageId}"]`);
+            const footerLink = document.querySelector(`.footer-links a[data-page="${pageId}"]`);
+            
+            // Update header link
+            if (headerLink) {
+                this.navLinks.forEach(nav => {
+                    nav.classList.remove('active');
+                    nav.setAttribute('aria-current', 'false');
+                });
+                headerLink.classList.add('active');
+                headerLink.setAttribute('aria-current', 'page');
+            }
+            
+            // Update footer link
+            if (footerLink) {
+                this.footerLinks.forEach(footer => {
+                    footer.classList.remove('active');
+                    footer.setAttribute('aria-current', 'false');
+                });
+                footerLink.classList.add('active');
+                footerLink.setAttribute('aria-current', 'page');
+            }
+        }
     }
 
     showPage(pageId) {
@@ -798,11 +872,87 @@ style.textContent = `
         overflow-y: auto;
     }
     
+
     /* Prevent background scroll when menu is open */
     body.menu-open {
         overflow: hidden;
         position: fixed;
         width: 100%;
+    }
+    
+    /* ===== FOOTER LINKS STYLING ===== */
+    
+    /* Footer links styling */
+    .footer-links a {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 0;
+        color: var(--text-secondary);
+        text-decoration: none;
+        transition: all 0.2s ease;
+        border-radius: 6px;
+        min-height: 44px;
+        position: relative;
+    }
+    
+    .footer-links a:hover {
+        color: var(--primary);
+        background-color: rgba(255, 0, 80, 0.1);
+        transform: translateX(4px);
+    }
+    
+    .footer-links a.active {
+        color: var(--primary);
+        background-color: rgba(255, 0, 80, 0.15);
+        border-left: 3px solid var(--primary);
+        padding-left: 0.75rem;
+    }
+    
+    .footer-links a:focus {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+    }
+    
+    .footer-links a:active {
+        transform: scale(0.98);
+        background-color: rgba(255, 0, 80, 0.2);
+    }
+    
+    /* Better mobile touch targets for footer */
+    @media (max-width: 768px) {
+        .footer-links a {
+            min-height: 48px;
+            padding: 0.75rem 0;
+        }
+    }
+    
+    /* Prevent text selection on footer links */
+    .footer-links a {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+    
+    /* Accessibility improvements for footer */
+    @media (prefers-contrast: high) {
+        .footer-links a.active {
+            background-color: #ffffff;
+            color: #000000;
+            font-weight: bold;
+        }
+    }
+    
+    /* Reduced motion support for footer */
+    @media (prefers-reduced-motion: reduce) {
+        .footer-links a {
+            transition: none;
+        }
+        
+        .footer-links a:hover,
+        .footer-links a:active {
+            transform: none;
+        }
     }
 `;
 document.head.appendChild(style);
@@ -983,9 +1133,7 @@ async function displayResult(data) {
                 <button onclick="downloadFile('${data.video.no_watermark_hd}', 'tiksave_content${data.video.id || Date.now()}_hd', 'video')" class="btn btn-primary" data-type="video">
                     <span class="btn-text"><i class="fas fa-hd"></i> Video HD</span>
                 </button>
-                <button onclick="downloadFile('${data.video.music}', 'tiksave_content${data.video.id || Date.now()}_music', 'audio')" class="btn btn-secondary" data-type="audio">
-                    <span class="btn-text"><i class="fas fa-music"></i> Musik Terpisah</span>
-                </button>
+
             </div>
             
             <div class="mt-4 text-center">
