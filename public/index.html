@@ -1454,30 +1454,6 @@
 
 
         /* Extra small mobile screens */
-        @media (max-width: 480px) {
-            .example-grid .code-block {
-                font-size: 0.6875rem;
-                padding: 0.625rem;
-                max-height: 250px;
-                /* Better width control on very small screens */
-                max-width: 100%;
-                width: 100%;
-                box-sizing: border-box;
-                /* Better text wrapping for very small screens */
-                white-space: pre-wrap;
-                word-break: break-word;
-                /* Improve touch scrolling */
-                -webkit-overflow-scrolling: touch;
-                /* Prevent horizontal overflow */
-                overflow-x: auto;
-                overflow-y: auto;
-            }
-            
-            /* Stack example cards vertically on very small screens */
-            .example-grid > div {
-                margin-bottom: 1rem;
-            }
-        }
 
         .code-block::before {
             content: '';
@@ -1501,6 +1477,7 @@
                 font-size: 0.875rem;
                 padding: 1.5rem;
                 max-height: 500px;
+
             }
             
             .code-block-header {
@@ -2866,134 +2843,6 @@ if data.get("ok"):
                         </div>
                     </div>
                 </div>
-
-                <!-- Contoh Response dengan Teks Panjang -->
-                <div class="mt-8">
-                    <h3 class="mb-3"><i class="fas fa-scroll text-primary"></i> Contoh Response dengan Teks Panjang</h3>
-                    <p class="text-gray mb-4">Contoh response API dengan data teks yang panjang dan dapat di-scroll secara horizontal tanpa membuat layout berantakan:</p>
-                    
-
-
-                    <div class="code-block-container">
-                        <div class="code-block-header">
-                            <span class="code-language">json</span>
-                            <button class="copy-btn" onclick="copyCode(this)">
-                                <i class="fas fa-copy"></i>
-                                Copy
-                            </button>
-                        </div>
-                        <pre class="code-block"><code class="language-json">{
-  "ok": true,
-  "type": "video",
-  "creator": "Content Creator dengan Nama yang Sangat Panjang Sekali dan Tidak Biasa",
-  "description": "Ini adalah deskripsi video yang sangat panjang sekali dan contain berbagai informasi detail tentang konten video TikTok yang diunduh termasuk hashtag yang banyak sekali seperti #fyp #foryou #viral #trending #tiktok #indonesia #lucu #menghibur #konten #kreasi #original #独特 #有趣 #病毒式传播 #印尼 #创意 #原创内容",
-  "prompt": "https://vt.tiktok.com/ZSfsDhoBk/",
-  "video": {
-    "title": "Video TikTok dengan Judul yang Sangat Panjang Sekali dan Mengandung Banyak Informasi Detail Tentang Konten Video Ini Agar Dapat Menguji Bagaimana Responsivitas Horizontal Scroll Pada Block Code",
-    "author": "Nama Author dengan Title dan Deskripsi yang Sangat Panjang Sekali Termasuk Informasi Profil, Bio, dan Detail Lainnya yang Membutuhkan Ruang Lebih",
-    "region": "ID",
-    "cover": "https://p16-sign-va.tiktokcdn.com/tos-useast2a-pve-0068-euttp/o8AE4eQIgD3B5gB9e9Q3rQ2A3zQ5A7B6C5D4E3F2G1H0I9J8K7L6M5N4O3P2Q1R0S9T8U7V6W5X4Y3Z2A1B0C9D8E7F6G5H4I3J2K1L0M9N8O7P6Q5R4S3T2U1V0W9X8Y7Z6A5B4C3D2E1F0G9H8I7J6K5L4M3N2O1P0Q9R8S7T6U5V4W3X2Y1Z0",
-    "no_watermark": "https://v16m.tiktokcdn.com/video/TikTokVideo Dengan URL yang Sangat Panjang Sekali dan Contain Informasi Detail Including Query Parameters Dan Data Lainnya Yang Diperlukan Untuk Download Video Tanpa Watermark Dengan Kualitas HD",
-    "no_watermark_hd": "https://v16m-default.tiktokcdn.com/Video HD URL Dengan Path yang Sangat Panjang dan Contain Banyak Query Parameters Including Access Token, Expiration Time, Quality Settings, dan Informasi Metadata Lainnya Yang Diperlukan Untuk Streaming Video HD",
-    "music": "https://v19-ies-music.tiktokcdn.com/Audio URL dengan Format yang Sangat Panjang dan Detail Including Artist Name, Song Title, Album Information, Duration, Bitrate, dan File Size Information"
-  },
-  "metadata": {
-    "video_id": "video_id_yang_sangat_panjang_sekali_dengan_format_khusus_tiktok",
-    "create_time": 1703123456,
-    "duration": 67,
-    "height": 1920,
-    "width": 1080,
-    "fps": 30,
-    "bitrate": 2500000,
-    "quality_label": "1080p",
-    "codec_name": "h264",
-    "has_watermark": false,
-    "download_count": 1250,
-    "view_count": 15420,
-    "like_count": 890,
-    "comment_count": 45,
-    "share_count": 23,
-    "is_commercial": false,
-    "language": "id",
-    "region_lock": false,
-    "available_regions": ["ID", "US", "MY", "SG", "TH", "VN", "PH", "BN", "KH", "LA", "MM"]
-  },
-  "author_info": {
-    "user_id": "user_id_yang_sangat_panjang_dengan_format_khusus",
-    "username": "content_creator_dengan_nama_yang_sangat_panjang_sekali",
-    "nickname": "Content Creator Premium dengan Badge Verifikasi dan Status Khusus",
-    "avatar": "https://p16-sign-va.tiktokcdn.com/user-avatar-url-yang-sangat-panjang-dengan-informasi-detail-tentang-profile-picture",
-    "signature": "Bio profile yang sangat panjang sekali dan contain informasi detail tentang creator ini termasuk deskripsi konten, specializations, achievements, collaborations, dan informasi lainnya yang membantu followers了解 creator ini lebih baik lagi",
-    "verified": true,
-    "verified_type": "enterprise",
-    "follower_count": 125000,
-    "following_count": 450,
-    "likes_count": 2340000,
-    "video_count": 156,
-    "is_private": false,
-    "is_business": true,
-    "business_info": {
-      "contact_email": "creator@example.com",
-      "website": "https://creator-website-yang-sangat-panjang-dengan-domain-complicated.com",
-      "location": "Jakarta, Indonesia",
-      "category": "Entertainment & Lifestyle",
-      "subcategory": "Comedy & Social Content Creation",
-      "established_year": 2020,
-      "collaboration_brands": ["Brand A dengan Nama yang Panjang", "Brand B dengan Deskripsi Detail", "Brand C dengan Informasi Komprehensif"]
-    }
-  },
-  "hashtags": [
-    "#fyp - For You Page viral content",
-    "#foryou - Recommended algorithm content",
-    "#viral - Trending viral videos",
-    "#trending - Currently trending topics",
-    "#tiktok - TikTok official hashtag",
-    "#indonesia - Indonesian content",
-    "#lucu - Funny Indonesian content",
-    "#menghibur - Entertainment content",
-    "#konten - Content creation",
-    "#kreasi - Creative content",
-    "#original - Original content",
-    "#独特 - Unique Chinese content",
-    "#有趣 - Funny Chinese content",
-    "#病毒式传播 - Viral spread Chinese",
-    "#印尼 - Indonesian Chinese",
-    "#创意 - Creative Chinese",
-    "#原创内容 - Original content Chinese"
-  ],
-  "mentions": [
-    {
-      "user_id": "mentioned_user_id_yang_sangat_panjang",
-      "username": "mentioned_user_dengan_nama_yang_panjang",
-      "display_name": "Mentioned User dengan Nama Lengkap dan Title",
-      "is_verified": true
-    }
-  ],
-  "effects": [
-    {
-      "effect_id": "effect_id_yang_sangat_panjang_dengan_format_khusus",
-      "effect_name": "Effect Name yang Sangat Panjang dengan Deskripsi Detail",
-      "effect_description": "Deskripsi effect yang sangat detail dan panjang termasuk cara penggunaan, trend information, popular creators yang menggunakan effect ini, dan informasi teknis lainnya",
-      "creator": "Effect Creator dengan nama yang panjang",
-      "is_trending": true,
-      "usage_count": 15420,
-      "category": "Beauty & Fashion"
-    }
-  ]
-}</code></pre>
-                    </div>
-                    
-                    <div class="mt-4 p-4" style="background: rgba(16, 185, 129, 0.1); border-left: 4px solid var(--success); border-radius: var(--border-radius-sm);">
-                        <h4 class="text-success mb-2"><i class="fas fa-info-circle"></i> Fitur Horizontal Scroll</h4>
-                        <ul class="text-sm text-gray space-y-1">
-                            <li>• Teks panjang dalam response akan ter-scroll secara horizontal</li>
-                            <li>• Layout tetap rapi tanpa破坏了 tampilan</li>
-                            <li>• Scrollbar muncul otomatis ketika diperlukan</li>
-                            <li>• Kompatibel dengan desktop dan mobile device</li>
-                            <li>• CSS styling yang konsisten dengan tema aplikasi</li>
-                        </ul>
-                    </div>
-                </div>
             </div>
         </section>
     </main>
@@ -3111,7 +2960,6 @@ if data.get("ok"):
 
 
 
-
         // Function to constrain code block width on mobile
         function constrainCodeBlockWidth() {
             const isMobile = window.innerWidth <= 768;
@@ -3121,33 +2969,27 @@ if data.get("ok"):
                 if (isMobile) {
                     // Get the parent container width
                     const parentContainer = codeBlock.closest('.example-grid');
-                    const parentDiv = codeBlock.closest('.example-grid > div');
-                    
-                    if (parentContainer && parentDiv) {
-                        const containerWidth = parentDiv.clientWidth;
+                    if (parentContainer) {
+                        const containerWidth = parentContainer.clientWidth;
                         const padding = 32; // Account for container padding
                         const maxWidth = containerWidth - padding;
                         
                         // Set maximum width to prevent overflow
-                        codeBlock.style.maxWidth = Math.max(maxWidth, 280) + 'px';
+                        codeBlock.style.maxWidth = maxWidth + 'px';
                         codeBlock.style.overflowX = 'auto';
                         codeBlock.style.overflowY = 'auto';
                         
                         // Add mobile-specific class
                         codeBlock.classList.add('mobile-constrained');
                         
-                        // Ensure proper text wrapping for mobile
-                        codeBlock.style.whiteSpace = 'pre-wrap';
-                        codeBlock.style.wordBreak = 'break-word';
+                        // Force horizontal scroll for very long URLs
+                        const longUrlRegex = /https?:\/\/[^\s"']+/;
+                        const hasLongUrl = longUrlRegex.test(codeBlock.textContent);
                         
-                        // Add touch scrolling support
-                        codeBlock.style.webkitOverflowScrolling = 'touch';
-                        
-                        console.log('Mobile constraints applied:', {
-                            containerWidth,
-                            maxWidth: Math.max(maxWidth, 280),
-                            isMobile
-                        });
+                        if (hasLongUrl) {
+                            codeBlock.style.whiteSpace = 'pre';
+                            codeBlock.style.wordWrap = 'normal';
+                        }
                     }
                 } else {
                     // Remove constraints on desktop
@@ -3155,14 +2997,11 @@ if data.get("ok"):
                     codeBlock.classList.remove('mobile-constrained');
                     
                     // Reset text wrapping for desktop
-                    codeBlock.style.whiteSpace = 'pre-wrap';
-                    codeBlock.style.wordBreak = 'break-word';
-                    
-                    console.log('Desktop constraints applied');
+                    codeBlock.style.whiteSpace = 'pre';
+                    codeBlock.style.wordWrap = 'normal';
                 }
             });
         }
-
 
         // Initialize highlight.js when page is loaded
         document.addEventListener('DOMContentLoaded', function() {
@@ -3171,16 +3010,13 @@ if data.get("ok"):
                 hljs.highlightAll();
             }
             
-            // Apply width constraints for mobile code blocks
+            // Apply width constraints for mobile
             constrainCodeBlockWidth();
             
             // Re-apply constraints on window resize
             window.addEventListener('resize', function() {
                 setTimeout(constrainCodeBlockWidth, 100);
             });
-            
-            // Re-apply constraints after a short delay to ensure DOM is fully loaded
-            setTimeout(constrainCodeBlockWidth, 500);
             
             // Add scroll detection for code blocks
             const codeContainers = document.querySelectorAll('.code-block-container');
