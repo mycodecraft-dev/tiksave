@@ -957,6 +957,206 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
+
+
+// ===== CONTENT TYPE DETECTION =====
+function detectContentType(data) {
+    const contentInfo = {
+        type: 'unknown',
+        hasVideo: false,
+        hasAudio: false,
+        hasImages: false,
+        videoUrls: [],
+        audioUrls: [],
+        imageUrls: [],
+        coverUrl: '',
+        canDownloadVideo: false,
+        canDownloadAudio: false,
+        canDownloadImages: false
+    };
+
+    try {
+        // Debug: log data yang diterima
+        console.log('Data received for detection:', JSON.stringify(data, null, 2));
+
+        // Deteksi dari data.type jika ada
+        if (data.type) {
+            if (data.type === 'video') contentInfo.type = 'video';
+            else if (data.type === 'image' || data.type === 'photo') contentInfo.type = 'image';
+            else if (data.type === 'audio') contentInfo.type = 'audio';
+        }
+
+        // Deteksi video
+        if (data.video) {
+            contentInfo.hasVideo = true;
+            contentInfo.canDownloadVideo = true;
+            
+
+            // Hanya prioritaskan video HD jika tersedia
+            if (data.video.no_watermark_hd) {
+                contentInfo.videoUrls.push({
+                    url: data.video.no_watermark_hd,
+                    quality: 'hd',
+                    label: 'Video HD'
+                });
+            }
+
+            // Set cover URL
+            if (data.video.cover) {
+                contentInfo.coverUrl = data.video.cover;
+            }
+        }
+
+        // Deteksi audio/musik - IMPROVED DETECTION
+        // Cek dari berbagai sumber musik
+        if (data.music) {
+            contentInfo.hasAudio = true;
+            contentInfo.canDownloadAudio = true;
+            contentInfo.audioUrls.push({
+                url: data.music,
+                type: 'music'
+            });
+            console.log('Audio detected from data.music:', data.music);
+        }
+
+        // Fallback: coba deteksi audio dari video object
+        if (data.video) {
+            // Cek music di dalam video object
+            if (data.video.music) {
+                contentInfo.hasAudio = true;
+                contentInfo.canDownloadAudio = true;
+                contentInfo.audioUrls.push({
+                    url: data.video.music,
+                    type: 'music'
+                });
+                console.log('Audio detected from data.video.music:', data.video.music);
+            }
+
+            // Cek sound_music di dalam video object
+            if (data.video.sound_music) {
+                contentInfo.hasAudio = true;
+                contentInfo.canDownloadAudio = true;
+                contentInfo.audioUrls.push({
+                    url: data.video.sound_music,
+                    type: 'music'
+                });
+                console.log('Audio detected from data.video.sound_music:', data.video.sound_music);
+            }
+
+            // Cek audio_url di dalam video object
+            if (data.video.audio_url) {
+                contentInfo.hasAudio = true;
+                contentInfo.canDownloadAudio = true;
+                contentInfo.audioUrls.push({
+                    url: data.video.audio_url,
+                    type: 'music'
+                });
+                console.log('Audio detected from data.video.audio_url:', data.video.audio_url);
+            }
+        }
+
+        // Cek music_url langsung di root data
+        if (data.music_url) {
+            contentInfo.hasAudio = true;
+            contentInfo.canDownloadAudio = true;
+            contentInfo.audioUrls.push({
+                url: data.music_url,
+                type: 'music'
+            });
+            console.log('Audio detected from data.music_url:', data.music_url);
+        }
+
+        // Cek audio_url langsung di root data
+        if (data.audio_url) {
+            contentInfo.hasAudio = true;
+            contentInfo.canDownloadAudio = true;
+            contentInfo.audioUrls.push({
+                url: data.audio_url,
+                type: 'music'
+            });
+            console.log('Audio detected from data.audio_url:', data.audio_url);
+        }
+
+        // Deteksi gambar/foto
+        if (data.image) {
+            contentInfo.hasImages = true;
+            contentInfo.canDownloadImages = true;
+            contentInfo.imageUrls.push(data.image);
+            console.log('Image detected from data.image:', data.image);
+        }
+        
+        if (data.images && Array.isArray(data.images)) {
+            contentInfo.hasImages = true;
+            contentInfo.canDownloadImages = true;
+            contentInfo.imageUrls.push(...data.images);
+            console.log('Images detected from data.images:', data.images);
+        }
+        
+        if (data.photo && Array.isArray(data.photo)) {
+            contentInfo.hasImages = true;
+            contentInfo.canDownloadImages = true;
+            contentInfo.imageUrls.push(...data.photo);
+            console.log('Images detected from data.photo:', data.photo);
+        }
+        
+        // Cek single photo
+        if (data.photo && !Array.isArray(data.photo)) {
+            contentInfo.hasImages = true;
+            contentInfo.canDownloadImages = true;
+            contentInfo.imageUrls.push(data.photo);
+            console.log('Image detected from data.photo:', data.photo);
+        }
+        
+        if (data.cover && !contentInfo.coverUrl) {
+            contentInfo.coverUrl = data.cover;
+            // Jika tidak ada video tapi ada cover, anggap sebagai gambar
+            if (!contentInfo.hasVideo) {
+                contentInfo.hasImages = true;
+                contentInfo.canDownloadImages = true;
+                contentInfo.imageUrls.push(data.cover);
+            }
+            console.log('Cover URL detected:', data.cover);
+        }
+
+        // Cek image_urls array
+        if (data.image_urls && Array.isArray(data.image_urls)) {
+            contentInfo.hasImages = true;
+            contentInfo.canDownloadImages = true;
+            contentInfo.imageUrls.push(...data.image_urls);
+            console.log('Images detected from data.image_urls:', data.image_urls);
+        }
+
+        // Tentukan tipe konten utama berdasarkan prioritas
+        if (contentInfo.hasVideo && contentInfo.type === 'unknown') {
+            contentInfo.type = 'video';
+        } else if (contentInfo.hasImages && contentInfo.type === 'unknown') {
+            contentInfo.type = 'image';
+        } else if (contentInfo.hasAudio && contentInfo.type === 'unknown') {
+            contentInfo.type = 'audio';
+        }
+
+        // Jika masih unknown, coba deteksi dari URL atau struktur data
+        if (contentInfo.type === 'unknown') {
+            if (contentInfo.videoUrls.length > 0) {
+                contentInfo.type = 'video';
+            } else if (contentInfo.imageUrls.length > 0) {
+                contentInfo.type = 'image';
+            } else if (contentInfo.audioUrls.length > 0) {
+                contentInfo.type = 'audio';
+            } else {
+                contentInfo.type = 'unknown';
+            }
+        }
+
+        console.log('Final content detection result:', contentInfo);
+        return contentInfo;
+
+    } catch (error) {
+        console.error('Error detecting content type:', error);
+        return contentInfo;
+    }
+}
+
 // ===== VIDEO ASPECT RATIO DETECTION =====
 function detectVideoAspectRatio(videoUrl) {
     return new Promise((resolve) => {
@@ -1035,26 +1235,40 @@ function detectVideoAspectRatio(videoUrl) {
     });
 }
 
-// Perbarui fungsi displayResult untuk menggunakan rasio aspek yang terdeteksi
+
+// Perbarui fungsi displayResult untuk menggunakan deteksi otomatis konten
 async function displayResult(data) {
+    // Deteksi konten menggunakan function baru
+    const contentInfo = detectContentType(data);
     let html = '';
 
-    if (data.type === 'video') {
+
+    // Handle video content
+    if (contentInfo.type === 'video' || contentInfo.hasVideo) {
         // Deteksi rasio aspek video
         let ratioClass = 'portrait'; // default
         let detectedWidth = 1080;
         let detectedHeight = 1920;
 
-        try {
-            const videoInfo = await detectVideoAspectRatio(data.video.no_watermark);
-            ratioClass = videoInfo.ratioClass;
-            detectedWidth = videoInfo.width;
-            detectedHeight = videoInfo.height;
+        // Gunakan URL video pertama yang tersedia
+        const primaryVideoUrl = contentInfo.videoUrls.find(v => v.quality === 'hd')?.url || 
+                               contentInfo.videoUrls.find(v => v.quality === 'standard')?.url || '';
 
-            console.log(`Video detected: ${detectedWidth}x${detectedHeight}, ratio: ${videoInfo.aspectRatio}, class: ${ratioClass}`);
+        try {
+            if (primaryVideoUrl) {
+                const videoInfo = await detectVideoAspectRatio(primaryVideoUrl);
+                ratioClass = videoInfo.ratioClass;
+                detectedWidth = videoInfo.width;
+                detectedHeight = videoInfo.height;
+
+                console.log(`Video detected: ${detectedWidth}x${detectedHeight}, ratio: ${videoInfo.aspectRatio}, class: ${ratioClass}`);
+            }
         } catch (error) {
             console.log('Gagal mendeteksi rasio aspek video:', error);
         }
+
+        // Gunakan poster dari contentInfo
+        const posterUrl = contentInfo.coverUrl || data.video?.cover || '';
 
         html = `
         <div class="download-card">
@@ -1062,8 +1276,8 @@ async function displayResult(data) {
             
             <div class="media-preview">
                 <div class="video-player-container ${ratioClass}">
-                    <video class="video-player" id="video-player" poster="${data.video.cover}">
-                        <source src="${data.video.no_watermark}" type="video/mp4">
+                    <video class="video-player" id="video-player" poster="${posterUrl}">
+                        <source src="${primaryVideoUrl}" type="video/mp4">
                         Browser Anda tidak mendukung pemutaran video.
                     </video>
                     <div class="play-overlay">
@@ -1075,42 +1289,50 @@ async function displayResult(data) {
                 
                 <div class="media-info">
                     <h4 class="mb-3"><i class="fas fa-info-circle text-primary"></i> Informasi Video</h4>
+                    ${data.video?.title || data.title ? `
                     <div class="info-item">
                         <div class="info-icon">
                             <i class="fas fa-heading"></i>
                         </div>
                         <div class="info-content">
                             <span class="text-sm text-gray">Judul</span>
-                            <span class="font-semibold">${data.video.title || 'Tidak tersedia'}</span>
+                            <span class="font-semibold">${data.video?.title || data.title || 'Tidak tersedia'}</span>
                         </div>
                     </div>
+                    ` : ''}
+                    ${data.video?.author || data.author ? `
                     <div class="info-item">
                         <div class="info-icon">
                             <i class="fas fa-user"></i>
                         </div>
                         <div class="info-content">
                             <span class="text-sm text-gray">Pembuat Konten</span>
-                            <span class="font-semibold">${data.video.author || 'Tidak tersedia'}</span>
+                            <span class="font-semibold">${data.video?.author || data.author || 'Tidak tersedia'}</span>
                         </div>
                     </div>
+                    ` : ''}
+                    ${data.video?.region || data.region ? `
                     <div class="info-item">
                         <div class="info-icon">
                             <i class="fas fa-globe"></i>
                         </div>
                         <div class="info-content">
                             <span class="text-sm text-gray">Region</span>
-                            <span class="font-semibold">${data.video.region || 'Tidak tersedia'}</span>
+                            <span class="font-semibold">${data.video?.region || data.region || 'Tidak tersedia'}</span>
                         </div>
                     </div>
+                    ` : ''}
+                    ${data.creator ? `
                     <div class="info-item">
                         <div class="info-icon">
                             <i class="fas fa-user-circle"></i>
                         </div>
                         <div class="info-content">
                             <span class="text-sm text-gray">Creator Endpoint</span>
-                            <span class="font-semibold">${data.creator || 'Tidak tersedia'}</span>
+                            <span class="font-semibold">${data.creator}</span>
                         </div>
                     </div>
+                    ` : ''}
                     <div class="info-item">
                         <div class="info-icon">
                             <i class="fas fa-expand"></i>
@@ -1120,20 +1342,43 @@ async function displayResult(data) {
                             <span class="font-semibold">${detectedWidth} × ${detectedHeight} (${ratioClass})</span>
                         </div>
                     </div>
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-list"></i>
+                        </div>
+                        <div class="info-content">
+                            <span class="text-sm text-gray">Konten Tersedia</span>
+                            <span class="font-semibold">
+                                Video ${contentInfo.canDownloadAudio ? ', Audio' : ''} ${contentInfo.canDownloadImages ? ', Gambar' : ''}
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
             
-
             <h4 class="mt-6 mb-3"><i class="fas fa-download text-primary"></i> Pilihan Download</h4>
             <div class="download-progress" id="download-progress">
                 <div class="download-progress-bar" id="download-progress-bar"></div>
             </div>
 
             <div class="download-options">
-                <button onclick="downloadFile('${data.video.no_watermark_hd}', 'tiksave_content${data.video.id || Date.now()}_hd', 'video')" class="btn btn-primary" data-type="video">
-                    <span class="btn-text"><i class="fas fa-hd"></i> Video HD</span>
-                </button>
-
+                ${contentInfo.canDownloadVideo ? contentInfo.videoUrls.map(video => `
+                    <button onclick="downloadFile('${video.url}', 'tiksave_content${data.video?.id || Date.now()}_${video.quality}', 'video')" class="btn btn-primary" data-type="video">
+                        <span class="btn-text"><i class="fas fa-${video.quality === 'hd' ? 'hd' : 'video'}"></i> ${video.label}</span>
+                    </button>
+                `).join('') : ''}
+                
+                ${contentInfo.canDownloadAudio ? contentInfo.audioUrls.map(audio => `
+                    <button onclick="downloadFile('${audio.url}', 'tiksave_content${data.video?.id || Date.now()}_music', 'audio')" class="btn btn-secondary" data-type="audio">
+                        <span class="btn-text"><i class="fas fa-music"></i> Download Musik</span>
+                    </button>
+                `).join('') : ''}
+                
+                ${contentInfo.canDownloadImages ? contentInfo.imageUrls.slice(0, 3).map((image, index) => `
+                    <button onclick="downloadFile('${image}', 'tiksave_content${data.video?.id || Date.now()}_image${index + 1}', 'image')" class="btn btn-outline" data-type="image">
+                        <span class="btn-text"><i class="fas fa-image"></i> Gambar ${index + 1}</span>
+                    </button>
+                `).join('') : ''}
             </div>
             
             <div class="mt-4 text-center">
@@ -1142,23 +1387,23 @@ async function displayResult(data) {
                 </button>
             </div>
         </div>
-    `;
-    } else {
-        // Untuk konten gambar
+        `;
+    } else if (contentInfo.type === 'image') {
+        // Handle image content
         html = `
         <div class="download-card">
-            <h3 class="text-center mb-4"><i class="fas fa-check-circle text-success"></i> Konten Siap Diunduh!</h3>
+            <h3 class="text-center mb-4"><i class="fas fa-check-circle text-success"></i> Foto Siap Diunduh!</h3>
             
             <div class="media-preview">
                 <div class="image-container">
-                    <img src="${data.image || data.cover || data.images || ''}" 
+                    <img src="${contentInfo.imageUrls[0] || contentInfo.coverUrl}" 
                          alt="Preview" 
                          class="video-player"
                          onerror="this.onerror=null; this.src='https://via.placeholder.com/500x500?text=Image+Not+Available'">
                 </div>
                 
                 <div class="media-info">
-                    <h4 class="mb-3"><i class="fas fa-info-circle text-primary"></i> Informasi Konten</h4>
+                    <h4 class="mb-3"><i class="fas fa-info-circle text-primary"></i> Informasi Foto</h4>
                     ${data.title ? `
                     <div class="info-item">
                         <div class="info-icon">
@@ -1181,31 +1426,187 @@ async function displayResult(data) {
                         </div>
                     </div>
                     ` : ''}
-                    ${data.region ? `
+                    ${data.creator ? `
                     <div class="info-item">
                         <div class="info-icon">
-                            <i class="fas fa-globe"></i>
+                            <i class="fas fa-user-circle"></i>
                         </div>
                         <div class="info-content">
-                            <span class="text-sm text-gray">Region</span>
-                            <span class="font-semibold">${data.region}</span>
+                            <span class="text-sm text-gray">Creator Endpoint</span>
+                            <span class="font-semibold">${data.creator}</span>
                         </div>
                     </div>
                     ` : ''}
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-list"></i>
+                        </div>
+                        <div class="info-content">
+                            <span class="text-sm text-gray">Konten Tersedia</span>
+                            <span class="font-semibold">
+                                Foto ${contentInfo.canDownloadAudio ? ', Audio' : ''}
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
             
+            <h4 class="mt-6 mb-3"><i class="fas fa-download text-primary"></i> Pilihan Download</h4>
             <div class="download-options">
-                ${data.image || data.cover || data.images ? `
-                <button onclick="downloadFile('${data.image || data.cover || data.images}', 'tiksave_content${data.video.id || Date.now()}_image', 'image')" class="btn btn-primary" data-type="image">
-                    <span class="btn-text"><i class="fas fa-image"></i> Download Gambar</span>
+                ${contentInfo.canDownloadImages ? contentInfo.imageUrls.map((image, index) => `
+                    <button onclick="downloadFile('${image}', 'tiksave_content${Date.now()}_image${index + 1}', 'image')" class="btn btn-primary" data-type="image">
+                        <span class="btn-text"><i class="fas fa-image"></i> Download Foto ${index + 1}</span>
+                    </button>
+                `).join('') : ''}
+                
+                ${contentInfo.canDownloadAudio ? contentInfo.audioUrls.map(audio => `
+                    <button onclick="downloadFile('${audio.url}', 'tiksave_content${Date.now()}_music', 'audio')" class="btn btn-secondary" data-type="audio">
+                        <span class="btn-text"><i class="fas fa-music"></i> Download Musik</span>
+                    </button>
+                `).join('') : ''}
+            </div>
+            
+            <div class="mt-4 text-center">
+                <button class="btn btn-sm" onclick="resetForm()">
+                    <i class="fas fa-redo"></i> Download Foto Lain
                 </button>
-                ` : ''}
-                ${data.music ? `
-                <button onclick="downloadFile('${data.music}', 'tiksave_content${data.video.id || Date.now()}_music', 'audio')" class="btn btn-secondary" data-type="audio">
-                    <span class="btn-text"><i class="fas fa-music"></i> Download Musik</span>
+            </div>
+        </div>
+        `;
+    } else if (contentInfo.type === 'audio') {
+        // Handle audio content
+        html = `
+        <div class="download-card">
+            <h3 class="text-center mb-4"><i class="fas fa-check-circle text-success"></i> Audio Siap Diunduh!</h3>
+            
+            <div class="media-preview">
+                <div class="image-container d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #ff0050, #ff3377); min-height: 300px;">
+                    <div class="text-center text-white">
+                        <i class="fas fa-music fa-5x mb-4"></i>
+                        <h4>Audio TikTok</h4>
+                        <p>${data.title || 'Audio Content'}</p>
+                    </div>
+                </div>
+                
+                <div class="media-info">
+                    <h4 class="mb-3"><i class="fas fa-info-circle text-primary"></i> Informasi Audio</h4>
+                    ${data.title ? `
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-heading"></i>
+                        </div>
+                        <div class="info-content">
+                            <span class="text-sm text-gray">Judul</span>
+                            <span class="font-semibold">${data.title}</span>
+                        </div>
+                    </div>
+                    ` : ''}
+                    ${data.author ? `
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="info-content">
+                            <span class="text-sm text-gray">Pembuat</span>
+                            <span class="font-semibold">${data.author}</span>
+                        </div>
+                    </div>
+                    ` : ''}
+                    ${data.creator ? `
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <div class="info-content">
+                            <span class="text-sm text-gray">Creator Endpoint</span>
+                            <span class="font-semibold">${data.creator}</span>
+                        </div>
+                    </div>
+                    ` : ''}
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-music"></i>
+                        </div>
+                        <div class="info-content">
+                            <span class="text-sm text-gray">Format</span>
+                            <span class="font-semibold">MP3 Audio</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <h4 class="mt-6 mb-3"><i class="fas fa-download text-primary"></i> Download Audio</h4>
+            <div class="download-options">
+                ${contentInfo.canDownloadAudio ? contentInfo.audioUrls.map(audio => `
+                    <button onclick="downloadFile('${audio.url}', 'tiksave_content${Date.now()}_music', 'audio')" class="btn btn-secondary btn-lg" data-type="audio">
+                        <span class="btn-text"><i class="fas fa-music"></i> Download Musik MP3</span>
+                    </button>
+                `).join('') : '<p class="text-gray text-center">Tidak ada audio yang dapat diunduh</p>'}
+            </div>
+            
+            <div class="mt-4 text-center">
+                <button class="btn btn-sm" onclick="resetForm()">
+                    <i class="fas fa-redo"></i> Download Audio Lain
                 </button>
-                ` : ''}
+            </div>
+        </div>
+        `;
+    } else {
+        // Handle unknown content type
+        html = `
+        <div class="download-card">
+            <h3 class="text-center mb-4"><i class="fas fa-check-circle text-success"></i> Konten Siap Diunduh!</h3>
+            
+            <div class="media-preview">
+                <div class="video-player-container d-flex align-items-center justify-content-center" style="background: #f0f0f0; min-height: 300px;">
+                    <div class="text-center">
+                        <i class="fas fa-download fa-5x mb-4 text-gray"></i>
+                        <h4 class="text-gray">Konten Tidak Dikenal</h4>
+                        <p class="text-gray">Tipe konten: ${contentInfo.type}</p>
+                        <p class="text-sm text-gray">Silakan coba download jika tersedia</p>
+                    </div>
+                </div>
+                
+                <div class="media-info">
+                    <h4 class="mb-3"><i class="fas fa-info-circle text-primary"></i> Informasi Konten</h4>
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-list"></i>
+                        </div>
+                        <div class="info-content">
+                            <span class="text-sm text-gray">Konten Tersedia</span>
+                            <span class="font-semibold">
+                                ${contentInfo.canDownloadVideo ? 'Video' : ''}
+                                ${contentInfo.canDownloadAudio ? (contentInfo.canDownloadVideo ? ', ' : '') + 'Audio' : ''}
+                                ${contentInfo.canDownloadImages ? (contentInfo.canDownloadVideo || contentInfo.canDownloadAudio ? ', ' : '') + 'Gambar' : ''}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <h4 class="mt-6 mb-3"><i class="fas fa-download text-primary"></i> Download Tersedia</h4>
+            <div class="download-options">
+                ${contentInfo.canDownloadVideo ? contentInfo.videoUrls.map(video => `
+                    <button onclick="downloadFile('${video.url}', 'tiksave_content${Date.now()}_${video.quality}', 'video')" class="btn btn-primary" data-type="video">
+                        <span class="btn-text"><i class="fas fa-video"></i> ${video.label}</span>
+                    </button>
+                `).join('') : ''}
+                
+                ${contentInfo.canDownloadAudio ? contentInfo.audioUrls.map(audio => `
+                    <button onclick="downloadFile('${audio.url}', 'tiksave_content${Date.now()}_music', 'audio')" class="btn btn-secondary" data-type="audio">
+                        <span class="btn-text"><i class="fas fa-music"></i> Download Musik</span>
+                    </button>
+                `).join('') : ''}
+                
+                ${contentInfo.canDownloadImages ? contentInfo.imageUrls.slice(0, 3).map((image, index) => `
+                    <button onclick="downloadFile('${image}', 'tiksave_content${Date.now()}_image${index + 1}', 'image')" class="btn btn-outline" data-type="image">
+                        <span class="btn-text"><i class="fas fa-image"></i> Gambar ${index + 1}</span>
+                    </button>
+                `).join('') : ''}
+                
+                ${(!contentInfo.canDownloadVideo && !contentInfo.canDownloadAudio && !contentInfo.canDownloadImages) ? 
+                    '<p class="text-gray text-center">Tidak ada konten yang dapat diunduh</p>' : ''}
             </div>
             
             <div class="mt-4 text-center">
@@ -1214,7 +1615,10 @@ async function displayResult(data) {
                 </button>
             </div>
         </div>
-    `;
+
+
+
+        `;
     }
 
     resultContainer.innerHTML = html;
