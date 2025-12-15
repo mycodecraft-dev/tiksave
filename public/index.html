@@ -1375,6 +1375,7 @@
             background: var(--darker);
             padding: 1rem;
             font-family: 'Courier New', monospace;
+            
             overflow-x: auto;
             font-size: 0.8125rem;
             line-height: 1.5;
@@ -2798,7 +2799,7 @@
 
                         <div>
                             <h4 class="mb-2">JavaScript (Fetch API)</h4>
-                            <div class="code-block-container">
+                            <div class="code-block-container" id="jscode">
                                 <div class="code-block-header">
                                     <span class="code-language">javascript</span>
                                     <button class="copy-btn" onclick="copyCode(this)">
@@ -2971,6 +2972,7 @@ if data.get("ok"):
                     const parentContainer = codeBlock.closest('.example-grid');
                     if (parentContainer) {
                         const containerWidth = parentContainer.clientWidth;
+                        
                         const padding = 32; // Account for container padding
                         const maxWidth = containerWidth - padding;
                         
