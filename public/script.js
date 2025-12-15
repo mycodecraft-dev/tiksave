@@ -560,6 +560,7 @@ window.downloadFile = async function(fileUrl, filename, type = 'video') {
         console.error('Download error:', error);
         showError('Gagal mengunduh file. Silakan coba lagi.');
     } finally {
+
         // Remove loading state
         const activeBtn = document.querySelector('.download-options .btn');
         if (activeBtn) {
@@ -567,7 +568,7 @@ window.downloadFile = async function(fileUrl, filename, type = 'video') {
             const btnText = activeBtn.querySelector('.btn-text');
             if (btnText) {
                 if (type === 'video') {
-                    btnText.innerHTML = '<i class="fas fa-video"></i> Video (No Watermark)';
+                    btnText.innerHTML = '<i class="fas fa-hd"></i> Video HD';
                 } else if (type === 'audio') {
                     btnText.innerHTML = '<i class="fas fa-music"></i> Musik Terpisah';
                 } else if (type === 'image') {
@@ -977,14 +978,12 @@ async function displayResult(data) {
             <div class="download-progress" id="download-progress">
                 <div class="download-progress-bar" id="download-progress-bar"></div>
             </div>
+
             <div class="download-options">
-                <button onclick="downloadFile('${data.video.no_watermark}', 'tiksave_content${data.video.id || Date.now()}', 'video')" class="btn btn-primary" data-type="video">
-                    <span class="btn-text"><i class="fas fa-video"></i> Video (No Watermark)</span>
-                </button>
-                <button onclick="downloadFile('${data.video.no_watermark_hd}', 'tiksave_content${data.video.id || Date.now()}_hd', 'video')" class="btn btn-secondary" data-type="video">
+                <button onclick="downloadFile('${data.video.no_watermark_hd}', 'tiksave_content${data.video.id || Date.now()}_hd', 'video')" class="btn btn-primary" data-type="video">
                     <span class="btn-text"><i class="fas fa-hd"></i> Video HD</span>
                 </button>
-                <button onclick="downloadFile('${data.video.music}', 'tiksave_content${data.video.id || Date.now()}_music', 'audio')" class="btn btn-outline" data-type="audio">
+                <button onclick="downloadFile('${data.video.music}', 'tiksave_content${data.video.id || Date.now()}_music', 'audio')" class="btn btn-secondary" data-type="audio">
                     <span class="btn-text"><i class="fas fa-music"></i> Musik Terpisah</span>
                 </button>
             </div>
