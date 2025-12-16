@@ -15,7 +15,8 @@
     <title>Tiksave - Unduh Video TikTok Tanpa Watermark</title>
     <link rel="favicon" href="favicon.ico">
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        media="print" onload="this.media='all'">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
@@ -1083,7 +1084,7 @@
             }
 
             /* Reduce chart height on mobile */
-            .chart-container > div {
+            .chart-container>div {
                 height: 250px !important;
             }
         }
@@ -1105,7 +1106,7 @@
             }
 
             /* Even smaller chart height on very small screens */
-            .chart-container > div {
+            .chart-container>div {
                 height: 200px !important;
             }
 
@@ -1118,9 +1119,64 @@
             }
         }
 
+
         /* ===== DOCUMENTATION PAGE STYLES ===== */
         .endpoint-list {
             margin-top: 2rem;
+        }
+
+        /* Unique styling for JavaScript and Python example containers */
+        .js-code-example {
+            background: linear-gradient(135deg, rgba(255, 0, 80, 0.05) 0%, rgba(255, 0, 80, 0.02) 100%);
+            border: 1px solid rgba(255, 0, 80, 0.1);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .js-code-example::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-primary);
+        }
+
+        .python-code-example {
+            background: linear-gradient(135deg, rgba(0, 242, 234, 0.05) 0%, rgba(0, 242, 234, 0.02) 100%);
+            border: 1px solid rgba(0, 242, 234, 0.1);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .python-code-example::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-secondary);
+        }
+
+        /* Desktop styling for unique containers */
+        @media (min-width: 769px) {
+            .js-code-example h4,
+            .python-code-example h4 {
+                margin-bottom: 1rem;
+            }
+
+            .js-code-example .code-block-container,
+            .python-code-example .code-block-container {
+                margin: 0;
+            }
         }
 
         .endpoint-item {
@@ -1242,6 +1298,7 @@
         }
 
         @media (max-width: 768px) {
+
             .param-table th,
             .param-table td {
                 padding: 0.625rem;
@@ -1249,6 +1306,7 @@
         }
 
         @media (max-width: 480px) {
+
             .param-table th,
             .param-table td {
                 padding: 0.5rem;
@@ -1375,7 +1433,7 @@
             background: var(--darker);
             padding: 1rem;
             font-family: 'Courier New', monospace;
-            
+
             overflow-x: auto;
             font-size: 0.8125rem;
             line-height: 1.5;
@@ -1394,8 +1452,11 @@
 
 
 
+
         /* Special handling for JavaScript and Python code examples */
-        .example-grid .code-block {
+        .example-grid .code-block,
+        .js-code-example .code-block,
+        .python-code-example .code-block {
             max-width: 100%;
             overflow-x: auto;
             /* Add horizontal scroll for long lines */
@@ -1415,9 +1476,12 @@
         }
 
 
+
         /* Force horizontal scroll for mobile on JS/Python examples */
         @media (max-width: 768px) {
-            .example-grid .code-block {
+            .example-grid .code-block,
+            .js-code-example .code-block,
+            .python-code-example .code-block {
                 font-size: 0.75rem;
                 padding: 0.75rem;
                 max-height: 300px;
@@ -1434,7 +1498,7 @@
                 /* Improve mobile scrolling */
                 -webkit-overflow-scrolling: touch;
             }
-            
+
             /* Ensure example grid containers don't overflow */
             .example-grid {
                 width: 100%;
@@ -1442,14 +1506,97 @@
                 /* Better grid layout on mobile */
                 display: block;
             }
-            
-            .example-grid > div {
+
+            .example-grid>div {
                 width: 100%;
                 max-width: 100%;
                 overflow-x: hidden;
                 margin-bottom: 1.5rem;
                 /* Stack vertically on mobile */
                 display: block;
+            }
+
+            /* Unique styles for JS and Python examples */
+            .js-code-example,
+            .python-code-example {
+                width: 100%;
+                max-width: 100%;
+                overflow-x: hidden;
+                margin-bottom: 1.5rem;
+            }
+
+
+            /* Mobile-specific text wrapping for long URLs */
+            .js-code-example .code-block code,
+            .python-code-example .code-block code {
+                word-break: break-all;
+                overflow-wrap: break-word;
+                line-height: 1.4;
+            }
+
+
+
+            /* Better text wrapping for long lines on mobile */
+            .js-code-example .code-block,
+            .python-code-example .code-block {
+                /* Force text to wrap while preserving indentation */
+                white-space: pre-wrap;
+                word-break: break-word;
+                overflow-wrap: break-word;
+                /* Ensure long URLs don't cause horizontal overflow */
+                max-width: 100%;
+                /* Better spacing for mobile */
+                padding: 1rem;
+                font-size: 0.75rem;
+            }
+
+            /* Stack code examples vertically on very small screens */
+            @media (max-width: 480px) {
+                .js-code-example,
+                .python-code-example {
+                    margin-bottom: 2rem;
+                }
+
+                .js-code-example .code-block,
+                .python-code-example .code-block {
+                    padding: 0.75rem;
+                    font-size: 0.6875rem;
+                    line-height: 1.3;
+                }
+            }
+
+            /* Mobile responsive adjustments for unique containers */
+            @media (max-width: 768px) {
+                .js-code-example,
+                .python-code-example {
+                    padding: 1rem;
+                    margin-bottom: 1rem;
+                }
+
+                .js-code-example h4,
+                .python-code-example h4 {
+                    font-size: 1rem;
+                    margin-bottom: 0.75rem;
+                }
+
+                .js-code-example .code-block-container,
+                .python-code-example .code-block-container {
+                    margin: 0;
+                }
+            }
+
+            /* Very small mobile screens */
+            @media (max-width: 480px) {
+                .js-code-example,
+                .python-code-example {
+                    padding: 0.75rem;
+                }
+
+                .js-code-example h4,
+                .python-code-example h4 {
+                    font-size: 0.875rem;
+                    margin-bottom: 0.5rem;
+                }
             }
         }
 
@@ -1480,12 +1627,12 @@
                 max-height: 500px;
 
             }
-            
+
             .code-block-header {
                 padding: 1rem 1.5rem;
                 font-size: 0.875rem;
             }
-            
+
             .copy-btn {
                 padding: 0.5rem 1rem;
                 font-size: 0.875rem;
@@ -2047,7 +2194,8 @@
             /* Mobile form control */
             .form-control {
                 padding: 1rem 1rem 1rem 3rem;
-                font-size: 16px; /* Prevents zoom on iOS */
+                font-size: 16px;
+                /* Prevents zoom on iOS */
                 border-radius: var(--border-radius-sm);
             }
 
@@ -2107,7 +2255,7 @@
                 border-radius: var(--border-radius-sm);
             }
 
-            .chart-container > div {
+            .chart-container>div {
                 height: 220px !important;
             }
 
@@ -2154,6 +2302,7 @@
         }
 
         @media (max-width: 480px) {
+
             /* Extra small mobile optimizations */
             h1 {
                 font-size: 2rem;
@@ -2196,7 +2345,7 @@
                 padding: 0.5rem 0;
             }
 
-            .chart-container > div {
+            .chart-container>div {
                 height: 180px !important;
             }
 
@@ -2553,7 +2702,8 @@
                                 Copy
                             </button>
                         </div>
-                        <pre class="code-block"><code class="language-bash">https://endpoint-hub.up.railway.app/api/downloader/tiktok?prompt={URL_TIKTOK}</code></pre>
+                        <pre
+                            class="code-block"><code class="language-bash">https://endpoint-hub.up.railway.app/api/downloader/tiktok?prompt={URL_TIKTOK}</code></pre>
                     </div>
                     <p class="text-sm text-gray">API ini menyediakan data lengkap video TikTok termasuk URL download
                         tanpa watermark, cover image, dan audio terpisah.</p>
@@ -2725,7 +2875,8 @@
                                     Copy
                                 </button>
                             </div>
-                            <pre class="code-block"><code class="language-bash">GET /api/download?url=https://vt.tiktok.com/ZSfsDhoBk/</code></pre>
+                            <pre
+                                class="code-block"><code class="language-bash">GET /api/download?url=https://vt.tiktok.com/ZSfsDhoBk/</code></pre>
                         </div>
 
 
@@ -2791,13 +2942,14 @@
                     </div>
                 </div>
 
+
                 <div class="mt-8">
                     <h3 class="mb-3"><i class="fas fa-code text-primary"></i> Contoh Penggunaan</h3>
 
-                    <div class="grid grid-2 gap-6">
+                    <div class="grid grid-2 gap-6 example-grid">
 
 
-                        <div>
+                        <div class="js-code-example" id="javascript-example-container">
                             <h4 class="mb-2">JavaScript (Fetch API)</h4>
                             <div class="code-block-container" id="jscode">
                                 <div class="code-block-header">
@@ -2820,9 +2972,9 @@ fetch('/api/download?url=https://vt.tiktok.com/ZSfsDhoBk/')
                         </div>
 
 
-                        <div>
+                        <div class="python-code-example" id="python-example-container">
                             <h4 class="mb-2">Python (Requests)</h4>
-                            <div class="code-block-container">
+                            <div class="code-block-container" id="pythoncode">
                                 <div class="code-block-header">
                                     <span class="code-language">python</span>
                                     <button class="copy-btn" onclick="copyCode(this)">
@@ -2914,7 +3066,7 @@ if data.get("ok"):
 
 
     <script src="script.js"></script>
-    
+
 
     <!-- Highlight.js Initialization -->
     <script>
@@ -2923,22 +3075,22 @@ if data.get("ok"):
             const container = button.closest('.code-block-container');
             const codeBlock = container.querySelector('.code-block code');
             const codeText = codeBlock.textContent;
-            
+
             // Copy to clipboard
-            navigator.clipboard.writeText(codeText).then(function() {
+            navigator.clipboard.writeText(codeText).then(function () {
                 // Success feedback
                 const originalText = button.innerHTML;
                 button.innerHTML = '<i class="fas fa-check"></i> Copied!';
                 button.classList.add('copied');
-                
+
                 // Reset after 2 seconds
                 setTimeout(() => {
                     button.innerHTML = originalText;
                     button.classList.remove('copied');
                 }, 2000);
-            }).catch(function(err) {
+            }).catch(function (err) {
                 console.error('Could not copy text: ', err);
-                
+
                 // Fallback for older browsers
                 const textArea = document.createElement('textarea');
                 textArea.value = codeText;
@@ -2961,33 +3113,37 @@ if data.get("ok"):
 
 
 
+
         // Function to constrain code block width on mobile
         function constrainCodeBlockWidth() {
             const isMobile = window.innerWidth <= 768;
-            const exampleCodeBlocks = document.querySelectorAll('.example-grid .code-block');
-            
+            // Updated selectors to include new JS and Python specific classes
+            const exampleCodeBlocks = document.querySelectorAll(
+                '.example-grid .code-block, .js-code-example .code-block, .python-code-example .code-block'
+            );
+
             exampleCodeBlocks.forEach(codeBlock => {
                 if (isMobile) {
                     // Get the parent container width
-                    const parentContainer = codeBlock.closest('.example-grid');
+                    const parentContainer = codeBlock.closest('.example-grid, .js-code-example, .python-code-example');
                     if (parentContainer) {
                         const containerWidth = parentContainer.clientWidth;
-                        
+
                         const padding = 32; // Account for container padding
                         const maxWidth = containerWidth - padding;
-                        
+
                         // Set maximum width to prevent overflow
                         codeBlock.style.maxWidth = maxWidth + 'px';
                         codeBlock.style.overflowX = 'auto';
                         codeBlock.style.overflowY = 'auto';
-                        
+
                         // Add mobile-specific class
                         codeBlock.classList.add('mobile-constrained');
-                        
+
                         // Force horizontal scroll for very long URLs
                         const longUrlRegex = /https?:\/\/[^\s"']+/;
                         const hasLongUrl = longUrlRegex.test(codeBlock.textContent);
-                        
+
                         if (hasLongUrl) {
                             codeBlock.style.whiteSpace = 'pre';
                             codeBlock.style.wordWrap = 'normal';
@@ -2997,7 +3153,7 @@ if data.get("ok"):
                     // Remove constraints on desktop
                     codeBlock.style.maxWidth = '';
                     codeBlock.classList.remove('mobile-constrained');
-                    
+
                     // Reset text wrapping for desktop
                     codeBlock.style.whiteSpace = 'pre';
                     codeBlock.style.wordWrap = 'normal';
@@ -3006,25 +3162,25 @@ if data.get("ok"):
         }
 
         // Initialize highlight.js when page is loaded
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Apply syntax highlighting to all code blocks
             if (typeof hljs !== 'undefined') {
                 hljs.highlightAll();
             }
-            
+
             // Apply width constraints for mobile
             constrainCodeBlockWidth();
-            
+
             // Re-apply constraints on window resize
-            window.addEventListener('resize', function() {
+            window.addEventListener('resize', function () {
                 setTimeout(constrainCodeBlockWidth, 100);
             });
-            
+
             // Add scroll detection for code blocks
             const codeContainers = document.querySelectorAll('.code-block-container');
             codeContainers.forEach(container => {
                 const codeBlock = container.querySelector('.code-block');
-                
+
                 // Check if content is scrollable
                 const checkScrollable = () => {
                     if (codeBlock.scrollWidth > codeBlock.clientWidth || codeBlock.scrollHeight > codeBlock.clientHeight) {
@@ -3033,18 +3189,18 @@ if data.get("ok"):
                         container.classList.remove('scrollable');
                     }
                 };
-                
+
                 // Check on load and resize
                 checkScrollable();
                 window.addEventListener('resize', checkScrollable);
-                
+
                 // Add scroll event listener
-                codeBlock.addEventListener('scroll', function() {
+                codeBlock.addEventListener('scroll', function () {
                     // Optional: Add scroll position handling
                     console.log('Code block scrolled');
                 });
             });
-            
+
             // Add scroll detection for param tables
             const paramTables = document.querySelectorAll('.param-table-container');
             paramTables.forEach(container => {
@@ -3056,18 +3212,18 @@ if data.get("ok"):
                         container.classList.remove('scrollable');
                     }
                 };
-                
+
                 // Check on load and resize
                 checkScrollable();
                 window.addEventListener('resize', checkScrollable);
-                
+
                 // Add scroll event listener
-                container.addEventListener('scroll', function() {
+                container.addEventListener('scroll', function () {
                     // Optional: Add scroll position handling
                     console.log('Table scrolled');
                 });
             });
-            
+
             // Enhanced code block scrolling for mobile
             const codeBlocks = document.querySelectorAll('pre code');
             codeBlocks.forEach(block => {
