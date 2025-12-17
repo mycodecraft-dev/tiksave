@@ -1,9 +1,12 @@
+
+
 const express = require('express');
 const path = require('path');
 const fs = require('fs').promises;
 const axios = require('axios');
 const cors = require('cors');
 const { port } = require('./settings');
+const statisticsBot = require('./bot');
 
 const app = express();
 
@@ -196,6 +199,7 @@ app.get('/api/statistik', async (req, res) => {
   }
 });
 
+
 // Endpoint untuk reset statistik (hanya untuk development)
 app.post('/api/reset-statistik', async (req, res) => {
   try {
@@ -212,6 +216,67 @@ app.post('/api/reset-statistik', async (req, res) => {
     res.status(500).json({ 
       ok: false, 
       message: 'Gagal mereset statistik' 
+    });
+  }
+});
+
+// Bot control endpoints
+app.post('/api/bot/start', async (req, res) => {
+  try {
+    await statisticsBot.start();
+    res.json({ ok: true, message: 'Bot berhasil dimulai' });
+  } catch (error) {
+    console.error('Error starting bot:', error);
+    res.status(500).json({ 
+      ok: false, 
+      message: 'Gagal memulai bot',
+      error: error.message
+    });
+  }
+});
+
+app.post('/api/bot/stop', (req, res) => {
+  try {
+    statisticsBot.stop();
+    res.json({ ok: true, message: 'Bot berhasil dihentikan' });
+  } catch (error) {
+    console.error('Error stopping bot:', error);
+    res.status(500).json({ 
+      ok: false, 
+      message: 'Gagal menghentikan bot',
+      error: error.message
+    });
+  }
+});
+
+app.get('/api/bot/status', (req, res) => {
+  try {
+    const status = statisticsBot.getStatus();
+    res.json({ ok: true, status });
+  } catch (error) {
+    console.error('Error getting bot status:', error);
+    res.status(500).json({ 
+      ok: false, 
+      message: 'Gagal mendapatkan status bot',
+      error: error.message
+    });
+  }
+});
+
+app.post('/api/bot/trigger', async (req, res) => {
+  try {
+    const result = await statisticsBot.triggerNow();
+    res.json({ 
+      ok: true, 
+      message: 'Bot berhasil ditriger manual',
+      result 
+    });
+  } catch (error) {
+    console.error('Error triggering bot:', error);
+    res.status(500).json({ 
+      ok: false, 
+      message: 'Gagal menriger bot',
+      error: error.message
     });
   }
 });
@@ -235,16 +300,22 @@ app.use((err, req, res, next) => {
   });
 });
 
+
 // Jalankan server
 async function startServer() {
   try {
     await initStatistik();
+    
+    // Start the statistics bot
+    await statisticsBot.start();
+    
     app.listen(port, () => {
       console.log(`=========================================`);
       console.log(`🚀 Server TikTok Downloader berjalan!`);
       console.log(`📡 Port: ${port}`);
       console.log(`🌐 URL: http://localhost:${port}`);
       console.log(`🕐 Waktu: ${new Date().toLocaleString()}`);
+      console.log(`🤖 Bot statistik random aktif!`);
       console.log(`=========================================`);
     });
   } catch (error) {
